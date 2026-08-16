@@ -1,0 +1,10 @@
+# Claude Code local settings — can accumulate secrets (URLs, tokens) via
+# auto-recorded permission entries. Never commit this.
+.claude/settings.local.json
+
+# Backend URL / config — per BUILD-PLAN.md decision, kept out of
+# committed source rather than hardcoded in the frontend JS.
+config.local.js
+config.local.json
+
+.DS_Store

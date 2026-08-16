@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Storage Base</title>
+<link rel="stylesheet" href="css/tokens.css?v=40">
+<link rel="stylesheet" href="css/app.css?v=40">
+</head>
+<body>
+
+<div id="gate" class="gate">
+  <form id="gate-form" class="gate-card">
+    <div class="gate-icon">🔒</div>
+    <h1 class="gate-title">Storage Base</h1>
+    <input id="gate-input" class="gate-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Access code">
+    <div id="gate-error" class="gate-error" hidden></div>
+    <button id="gate-button" class="btn btn-primary gate-button" type="submit">Unlock</button>
+  </form>
+</div>
+
+<div id="app" class="app" hidden>
+  <nav class="sidebar">
+    <button class="nav-item" data-view="inventory">
+      <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" y1="22" x2="12" y2="12"></line></svg>
+      <span>Inventory</span>
+    </button>
+    <button class="nav-item" data-view="history">
+      <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      <span>History</span>
+    </button>
+    <button class="nav-item" data-view="settings">
+      <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <main class="content">
+    <section class="view-panel" data-view-panel="inventory">
+      <div class="inventory-layout">
+        <div class="inventory-list-pane">
+          <div class="page-header">
+            <h2>Inventory</h2>
+            <button id="inv-history-btn" class="btn-icon inv-history-btn" type="button" data-view="history" aria-label="View history">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </button>
+            <div class="inv-controls">
+              <div class="search-field">
+                <input id="inv-search" class="input search-input" type="text" placeholder="Search items">
+                <button id="inv-category-btn" class="btn-icon search-filter-btn" type="button" aria-label="Filter by category" aria-haspopup="true" aria-expanded="false">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                </button>
+                <div id="inv-category-menu" class="category-menu" hidden></div>
+              </div>
+              <button id="inv-category-clear" class="chip-clear" type="button" aria-label="Clear category filter" hidden>&times;</button>
+              <button id="inv-new-btn" class="btn btn-primary" type="button">+ New item</button>
+            </div>
+          </div>
+          <div id="inv-list-state" hidden></div>
+
+          <div id="inv-table-card" class="inv-table-card">
+            <table class="inv-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Amount</th>
+                  <th>Expiry</th>
+                </tr>
+              </thead>
+              <tbody id="inv-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <aside id="inv-detail-panel" class="inventory-detail-panel">
+          <div id="inv-detail-empty" class="inventory-detail-empty">
+            <p class="placeholder">Select an item to see details.</p>
+          </div>
+          <div id="inv-detail-content" class="inventory-detail-content" hidden>
+            <div class="inventory-detail-header">
+              <h3 id="detail-title" class="inventory-detail-title"></h3>
+              <div class="detail-menu-wrap">
+                <button id="detail-menu-btn" class="btn-icon" type="button" aria-label="More actions" aria-haspopup="true" aria-expanded="false">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="12" cy="5" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="12" cy="19" r="1.5"></circle></svg>
+                </button>
+                <div id="detail-menu" class="category-menu detail-menu" hidden>
+                  <button type="button" class="category-menu-item" id="detail-reprint-btn">Reprint</button>
+                  <button type="button" class="category-menu-item" id="detail-download-btn">Download</button>
+                  <div class="category-menu-divider"></div>
+                  <button type="button" class="category-menu-item category-menu-item-danger" id="detail-delete-btn">Delete item</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="label-preview">
+              <div id="detail-qr" class="qr-box"></div>
+              <div id="detail-id" class="label-id"></div>
+            </div>
+            <table class="detail-kv-table">
+              <tbody>
+                <tr><th>Name</th><td id="detail-kv-name"></td></tr>
+                <tr><th>Category</th><td id="detail-kv-category"></td></tr>
+                <tr><th>Amount</th><td id="detail-kv-amount"></td></tr>
+                <tr><th>Expiry</th><td id="detail-kv-expiry"></td></tr>
+                <tr><th>Note</th><td id="detail-kv-notes"></td></tr>
+              </tbody>
+            </table>
+
+            <div id="detail-delete-confirm" class="delete-confirm item-view-danger" hidden>
+              <p class="delete-confirm-text">Delete this item permanently? This can't be undone and it won't appear in History.</p>
+              <div class="delete-confirm-actions">
+                <button id="detail-delete-cancel" class="btn btn-secondary" type="button">Cancel</button>
+                <button id="detail-delete-confirm-btn" class="btn btn-destructive" type="button">Delete permanently</button>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+    <section class="view-panel" data-view-panel="history" hidden>
+      <div class="page-header">
+        <button id="hist-back-btn" class="btn-icon hist-back-btn" type="button" data-view="inventory" aria-label="Back to Inventory">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h2>History</h2>
+      </div>
+      <div id="hist-list-state" hidden></div>
+      <div class="inv-table-card">
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Amount</th>
+              <th>Removed</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="hist-list"></tbody>
+        </table>
+      </div>
+    </section>
+    <section class="view-panel" data-view-panel="settings" hidden>
+      <h2>Settings</h2>
+      <p class="placeholder settings-desktop-placeholder">More settings coming soon.</p>
+
+      <div class="settings-mobile">
+        <section class="settings-section">
+          <h3 class="settings-section-title">Devices using this code</h3>
+          <ul class="settings-device-list">
+            <li class="settings-device-row">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"></rect><line x1="11" y1="18" x2="13" y2="18"></line></svg>
+              <span>This iPhone</span>
+            </li>
+            <li class="settings-device-row">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+              <span>MacBook</span>
+            </li>
+          </ul>
+          <p class="settings-note">Illustrative only — Storage Base doesn't track real device activity.</p>
+        </section>
+
+        <section class="settings-section">
+          <h3 class="settings-section-title">Version</h3>
+          <p class="settings-version">Storage Base 1.0.0</p>
+        </section>
+
+        <section class="settings-section">
+          <h3 class="settings-section-title">Changelog</h3>
+          <ul class="settings-changelog">
+            <li>History, Delete &amp; Restore</li>
+            <li>Mobile Scan &amp; Remove</li>
+            <li>Desktop Inventory &amp; New Item</li>
+            <li>App shell &amp; access gate</li>
+            <li>Backend foundation</li>
+          </ul>
+        </section>
+      </div>
+    </section>
+    <section class="view-panel" data-view-panel="scan" hidden>
+      <div class="scan-view">
+        <div class="scan-viewfinder">
+          <video id="scan-video" playsinline autoplay muted></video>
+          <div class="scan-frame"></div>
+          <div id="scan-permission" class="scan-permission" hidden>
+            <p class="placeholder">Camera access is needed to scan labels.</p>
+            <button id="scan-permission-retry" class="btn btn-primary" type="button">Allow camera access</button>
+          </div>
+        </div>
+        <h3 class="scan-recent-title">Recent scans</h3>
+        <div id="scan-recent-list" class="recent-list"></div>
+      </div>
+    </section>
+    <section class="view-panel" data-view-panel="search" hidden>
+      <div class="search-takeover">
+        <div class="search-takeover-field">
+          <input id="search-input" class="input search-input" type="text" placeholder="Search items" autocomplete="off">
+          <button id="search-clear" class="chip-clear search-takeover-clear" type="button" aria-label="Clear search" hidden>&times;</button>
+        </div>
+        <button id="search-cancel" class="link-muted search-takeover-cancel" type="button" data-view="inventory">Cancel</button>
+      </div>
+      <div id="search-category-chips" class="chip-row"></div>
+      <div id="search-results" class="item-grid"></div>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <div class="tabbar-group glass-pill">
+      <button class="tab-item" data-view="inventory">
+        <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" y1="22" x2="12" y2="12"></line></svg>
+        <span class="tab-label">Inventory</span>
+      </button>
+      <button class="tab-item" data-view="scan">
+        <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+        <span class="tab-label">Scan</span>
+      </button>
+      <button class="tab-item" data-view="settings">
+        <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+        <span class="tab-label">Settings</span>
+      </button>
+    </div>
+    <button class="tabbar-search-btn glass-pill" data-view="search" aria-label="Search">
+      <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    </button>
+  </nav>
+</div>
+
+<div id="new-item-modal" class="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="new-item-title">
+    <button id="ni-close" class="modal-close" type="button" aria-label="Close">&times;</button>
+
+    <div class="modal-body">
+      <div id="new-item-stage-form">
+        <h2 id="new-item-title" class="modal-title">Add new item</h2>
+        <form id="new-item-form" novalidate>
+          <div class="field">
+            <label for="ni-name">Name</label>
+            <input id="ni-name" class="input" type="text" autocomplete="off">
+            <div class="field-error" data-error-for="name" hidden></div>
+          </div>
+
+          <div class="field">
+            <label>Category</label>
+            <div id="ni-category-chips" class="chip-row"></div>
+          </div>
+
+          <div class="field">
+            <label for="ni-amount">Amount</label>
+            <input id="ni-amount" class="input" type="number" inputmode="decimal" min="0" step="any">
+            <div class="field-error" data-error-for="amount" hidden></div>
+          </div>
+
+          <div class="field">
+            <label>Unit</label>
+            <div id="ni-unit-row" class="chip-row"></div>
+            <input id="ni-unit-other" class="input" type="text" placeholder="Unit" hidden>
+            <div class="field-error" data-error-for="unit" hidden></div>
+          </div>
+
+          <div class="field">
+            <label for="ni-expiry">Expiry date</label>
+            <input id="ni-expiry" class="input" type="date">
+          </div>
+
+          <div class="field">
+            <label for="ni-notes">Notes</label>
+            <textarea id="ni-notes" class="input textarea" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+
+      <div id="new-item-stage-label" hidden>
+        <div class="label-preview">
+          <div id="ni-qr" class="qr-box"></div>
+          <div id="ni-id" class="label-id"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="new-item-footer-form" class="modal-footer">
+      <button id="ni-cancel" class="btn btn-secondary" type="button">Cancel</button>
+      <button id="ni-submit" class="btn btn-primary" type="button">Add new item</button>
+    </div>
+    <div id="new-item-footer-label" class="modal-footer modal-footer-label" hidden>
+      <button id="ni-print" class="btn-icon" type="button" aria-label="Print">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+      </button>
+      <div class="footer-right">
+        <button id="ni-download" class="btn btn-secondary" type="button">Download</button>
+        <button id="ni-done" class="btn btn-primary" type="button">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="item-view-modal" class="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="item-view-title">
+    <button id="iv-close" class="modal-close" type="button" aria-label="Close">&times;</button>
+    <div class="modal-body">
+      <h2 id="item-view-title" class="modal-title"></h2>
+      <div class="label-preview">
+        <div id="iv-qr" class="qr-box"></div>
+        <div id="iv-id" class="label-id"></div>
+      </div>
+      <div id="iv-meta" class="item-sheet-meta"></div>
+      <div id="iv-expiry" class="item-card-expiry" hidden></div>
+      <p id="iv-notes" class="item-sheet-notes" hidden></p>
+    </div>
+  </div>
+</div>
+
+<div id="item-sheet" class="item-sheet" hidden>
+  <div class="item-sheet-body">
+    <div id="item-sheet-content"></div>
+  </div>
+  <div class="item-sheet-bar">
+    <button id="item-sheet-cancel" class="btn btn-secondary" type="button">Cancel</button>
+    <button id="item-sheet-remove" class="btn btn-primary" type="button">Remove</button>
+  </div>
+</div>
+
+<div id="print-label"></div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script src="config.local.js"></script>
+<script src="js/vendor/qrcode.min.js"></script>
+<script src="js/vendor/jsQR.min.js"></script>
+<script src="js/shared.js?v=40"></script>
+<script src="js/app.js?v=40"></script>
+<script src="js/toast.js?v=40"></script>
+<script src="js/inventory.js?v=40"></script>
+<script src="js/history.js?v=40"></script>
+<script src="js/search.js?v=40"></script>
+<script src="js/scan.js?v=40"></script>
+<script>window.storageBase.init();</script>
+</body>
+</html>

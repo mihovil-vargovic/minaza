@@ -1,0 +1,1434 @@
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: var(--font-body);
+  /* Page canvas — the sidebar blends into this, and .content floats on
+     top of it as a lighter card (--card-background). --background stays
+     the pure white used for inputs/buttons/modals throughout the UI. */
+  background: var(--page-background);
+  color: var(--foreground);
+  font-size: var(--text-p);
+  line-height: var(--text-p-lh);
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.btn {
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  padding: 0 var(--space-4);
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity var(--motion-default);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.btn-destructive {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+}
+
+.btn-secondary {
+  background: var(--background);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.input {
+  width: 100%;
+  height: 40px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 0 var(--space-3);
+  font-size: var(--text-p);
+  font-family: inherit;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.input:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+
+.input.invalid {
+  border-color: var(--destructive);
+}
+
+.textarea {
+  height: auto;
+  padding: var(--space-3);
+  resize: vertical;
+  min-height: 72px;
+}
+
+/* Access gate */
+.gate {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+}
+
+.gate-card {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.gate-icon {
+  font-size: 32px;
+  text-align: center;
+}
+
+.gate-title {
+  font-size: var(--text-h3);
+  line-height: var(--text-h3-lh);
+  text-align: center;
+  margin: 0;
+}
+
+.gate-input,
+.gate-button {
+  width: 100%;
+  height: 44px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 0 var(--space-4);
+  font-size: var(--text-p);
+}
+
+.gate-input:focus,
+.gate-button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+
+.gate-button {
+  border: none;
+}
+
+.gate-error {
+  color: var(--destructive);
+  font-size: var(--text-small);
+  text-align: center;
+}
+
+/* App shell */
+.app {
+  height: 100dvh;
+  display: flex;
+}
+
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  /* Top padding matches .content's margin-top so the first nav item
+     lines up with the card's top edge. */
+  padding: var(--space-6) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.nav-item,
+.tab-item {
+  background: none;
+  border: none;
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  color: var(--muted-foreground);
+  font-weight: 500;
+  font-size: var(--text-small);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.nav-icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* No fill for the active state — dark text + weight carries it. */
+.nav-item.active {
+  background: none;
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.tab-item.active {
+  background: rgba(9, 9, 11, 0.08);
+  color: var(--foreground);
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  margin: var(--space-6) var(--space-6) var(--space-6) 0;
+  padding: var(--space-5);
+  background: var(--card-background);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow-y: auto;
+}
+
+.view-panel h2 {
+  margin-top: 0;
+}
+
+.placeholder {
+  color: var(--muted-foreground);
+}
+
+/* Settings — real content on mobile (Devices/Version/Changelog),
+   placeholder-only on desktop per planning5. */
+.settings-mobile {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .settings-desktop-placeholder {
+    display: none;
+  }
+
+  .settings-mobile {
+    display: block;
+  }
+}
+
+.settings-section {
+  margin-bottom: var(--space-6);
+}
+
+.settings-section-title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.settings-device-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--background);
+}
+
+.settings-device-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+.settings-device-row:last-child {
+  border-bottom: none;
+}
+
+.settings-device-row svg {
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+}
+
+.settings-note {
+  margin: var(--space-2) 0 0;
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
+}
+
+.settings-version {
+  margin: 0;
+  color: var(--foreground);
+}
+
+.settings-changelog {
+  margin: 0;
+  padding-left: var(--space-5);
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
+  line-height: 1.8;
+}
+
+.tabbar {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .sidebar {
+    display: none;
+  }
+
+  .app {
+    flex-direction: column;
+  }
+
+  .content {
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: var(--space-4);
+    /* Clears the floating tab bar: its own height (56px) + its inset
+       from the viewport bottom + a visual gap above it. */
+    padding-bottom: calc(56px + var(--space-6) + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Floating "Liquid Glass"-style tab bar (current iOS convention) — per
+     reference screenshots (Notes' Write/Send/Paste + a separate circular
+     Search button; Photos' Library/Collections + a separate circular
+     Search button): the main group and the secondary action are TWO
+     independent floating glass pills with a gap between them, not one
+     continuous bar with an internal divider. .tabbar itself is just a
+     transparent flex row positioning those two pills — the glass
+     treatment lives on .tabbar-group and .tabbar-search-btn themselves. */
+  .tabbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    left: var(--space-4);
+    right: var(--space-4);
+    bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+    gap: var(--space-3);
+  }
+
+  .glass-pill {
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(250, 250, 250, 0.72);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* No flex-grow — sized to its content (3 tab items) rather than
+     stretched to fill the row, matching the reference screenshots where
+     the main pill is only as wide as it needs to be, not spanning most
+     of the bar. */
+  .tabbar-group {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    min-height: 56px;
+    padding: var(--space-1);
+    gap: var(--space-1);
+  }
+
+  .tab-item {
+    flex: 0 0 auto;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    border-radius: var(--radius-full);
+    padding: var(--space-2) var(--space-4);
+    transition: background var(--motion-default);
+  }
+
+  .tab-label {
+    font-size: 11px;
+  }
+
+  /* Separate circular Search button, matching the main pill's height —
+     an independent floating element, not a tab inside the group. */
+  .tabbar-search-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    background: none;
+    border: none;
+    color: var(--muted-foreground);
+    transition: background var(--motion-default), color var(--motion-default);
+  }
+
+  .tabbar-search-btn.active {
+    background: rgba(9, 9, 11, 0.08);
+    color: var(--foreground);
+  }
+
+  .modal-overlay {
+    padding: 0;
+  }
+
+  .modal {
+    max-width: none;
+    max-height: 100dvh;
+    height: 100dvh;
+    border-radius: 0;
+  }
+}
+
+/* Hover-only affordances — guarded so a touch tap doesn't leave the
+   hover state "stuck" until the next unrelated tap (no pointerleave
+   event on touch). */
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover {
+    opacity: 0.9;
+  }
+
+  .btn-secondary:hover,
+  .btn-icon:not(.active):hover,
+  .chip-clear:hover,
+  .chip:hover,
+  .modal-close:hover,
+  .category-menu-item:hover,
+  .tab-item:not(.active):hover,
+  .tabbar-search-btn:not(.active):hover,
+  .item-card:hover,
+  .inv-row:not(.inv-row-selected):not(.hist-row):hover {
+    background: var(--muted);
+  }
+
+  /* The sidebar itself sits on the muted page canvas, so var(--muted)
+     would be invisible here — needs a visibly darker shade to register. */
+  .nav-item:not(.active):hover {
+    background: var(--border);
+  }
+
+  .btn-icon.active:hover {
+    opacity: 0.9;
+  }
+
+  .btn-destructive:hover {
+    opacity: 0.9;
+  }
+
+  .link-muted:hover {
+    color: var(--destructive);
+  }
+}
+
+/* Inventory */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.page-header h2 {
+  margin: 0;
+  /* .inv-controls sits taller than the title text, and the row centers
+     its children by default — opt the title out so it lines up with
+     the flush-top titles on History/Settings instead of sitting a few
+     px lower. */
+  align-self: flex-start;
+}
+
+/* Desktop Inventory: 2/3 list + 1/3 persistent detail panel (replaces
+   the old click-a-card modal on desktop — mobile still uses the modal,
+   see .inventory-detail-panel below). */
+.inventory-layout {
+  display: flex;
+  align-items: flex-start;
+  /* Wider than the usual --space-5 gap used elsewhere — the list and
+     detail panel need to read as two clearly separate cards, not two
+     panels sitting close together. */
+  gap: var(--space-7);
+}
+
+/* Explicit calc()'d flex-basis (not just flex:2/flex:1's grow-ratio,
+   which content inside the panel was nudging a few points off a true
+   2:1 split) — fixed at exactly 2/3 and 1/3 of the gap-subtracted
+   width, flex-grow/shrink both off so neither side's content can pull
+   it wider or narrower than that. */
+.inventory-list-pane {
+  flex: 0 0 calc((100% - var(--space-7)) * 2 / 3);
+  min-width: 0;
+}
+
+.inventory-detail-panel {
+  flex: 0 0 calc((100% - var(--space-7)) * 1 / 3);
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+  position: sticky;
+  top: 0;
+}
+
+/* Wraps the table so the list pane reads as its own rectangle card too
+   — matching the detail panel's card treatment, not items floating
+   loose on the page background. */
+.inv-table-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.inv-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.inv-table th {
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--muted-foreground);
+  border-bottom: 1px solid var(--border);
+}
+
+.inv-row {
+  cursor: pointer;
+  transition: background var(--motion-default);
+}
+
+.inv-row td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--text-small);
+  /* .inv-table-card clips overflow (desktop) rather than scrolling — a
+     name/note with one long unbroken token (no spaces) would otherwise
+     overflow the cell instead of wrapping. */
+  overflow-wrap: anywhere;
+}
+
+.inv-row:last-child td {
+  border-bottom: none;
+}
+
+.inv-row-name {
+  font-weight: 600;
+  color: var(--foreground);
+  font-size: var(--text-p);
+}
+
+.inv-row-expiry {
+  color: var(--muted-foreground);
+}
+
+.inv-row-selected {
+  background: var(--muted);
+}
+
+.skeleton-row td {
+  padding: var(--space-3) var(--space-4);
+}
+
+.skeleton-row .skeleton-line {
+  height: 14px;
+  width: 70%;
+}
+
+.inventory-detail-empty {
+  padding: var(--space-4) 0;
+}
+
+.inventory-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.inventory-detail-title {
+  margin: 0;
+  font-size: var(--text-h3);
+  line-height: var(--text-h3-lh);
+}
+
+.detail-menu-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Combined selector (not just .detail-menu) so this reliably wins over
+   .category-menu's own top/right/min-width regardless of source order —
+   both classes share equal specificity otherwise. */
+.category-menu.detail-menu {
+  top: calc(100% + var(--space-2));
+  right: 0;
+  min-width: 140px;
+}
+
+@media (max-width: 767px) {
+  .inventory-layout {
+    display: block;
+  }
+
+  .inventory-detail-panel {
+    display: none;
+  }
+
+  /* Table cells get tight on a narrow screen — scope down the padding
+     rather than dropping columns, and let it scroll horizontally as a
+     safety net if it's still too tight on a very small phone. */
+  .inv-table-card {
+    overflow-x: auto;
+  }
+
+  .inv-table th,
+  .inv-row td {
+    padding: var(--space-2) var(--space-3);
+  }
+}
+
+.inv-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: var(--space-3);
+}
+
+.search-field {
+  position: relative;
+  flex: 0 1 240px;
+}
+
+.search-input {
+  padding-right: 44px;
+}
+
+@media (max-width: 767px) {
+  .inv-controls {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  /* Search (text query + category filter) is its own tab on mobile now
+     (see planning5) — the Inventory header keeps only the History icon;
+     the search field and the category-filter button both move to the
+     Search screen instead of staying here. */
+  .search-field,
+  #inv-category-clear {
+    display: none;
+  }
+
+  /* Item creation is desktop-only (see planning5 Preparation flow). */
+  #inv-new-btn {
+    display: none;
+  }
+}
+
+/* Filter icon merged into the search field's trailing edge — subtle by
+   default so it reads as part of the field, filled via the existing
+   .btn-icon.active rule when a category filter is engaged. */
+.search-filter-btn {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+}
+
+/* Active state — filled like .btn-primary, so an engaged filter reads
+   at a glance instead of only being visible via the "×" clear button. */
+.btn-icon.active {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+}
+
+.category-menu {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: 50;
+  min-width: 180px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.category-menu-item {
+  text-align: left;
+  background: none;
+  border: none;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--foreground);
+  font-size: var(--text-small);
+}
+
+.category-menu-item.active {
+  background: var(--muted);
+  font-weight: 600;
+}
+
+/* Delete lives in the detail panel's "⋮" menu, set apart from Reprint/
+   Download by a divider and destructive-red text (matches .btn-
+   destructive's color) rather than its own separate link below the
+   table. */
+.category-menu-divider {
+  height: 1px;
+  margin: var(--space-1) 0;
+  background: var(--border);
+}
+
+.category-menu-item-danger {
+  color: var(--destructive);
+}
+
+.chip-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--muted-foreground);
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+}
+
+
+/* History entry point (mobile only — desktop reaches History via the
+   sidebar, per planning5) and the pushed-page back button (mobile only —
+   desktop's History is a flat sidebar destination, no back button). */
+.inv-history-btn,
+.hist-back-btn {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .inv-history-btn,
+  .hist-back-btn {
+    display: inline-flex;
+  }
+}
+
+/* Mobile Search tab — full takeover, per planning5 */
+.search-takeover {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.search-takeover-field {
+  position: relative;
+  flex: 1;
+}
+
+.search-takeover-field .search-input {
+  padding-right: 40px;
+}
+
+.search-takeover-clear {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+}
+
+.search-takeover-cancel {
+  flex-shrink: 0;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* History — reuses Inventory's .inv-table/.inv-row styling; only the
+   trailing Restore-button cell is History-specific. Unlike Inventory
+   rows, a History row itself isn't clickable (only its Restore button
+   is), so it shouldn't borrow .inv-row's pointer cursor/hover tint. */
+.hist-row {
+  cursor: default;
+}
+
+.hist-row-action {
+  text-align: right;
+}
+
+#hist-list-state {
+  padding: var(--space-6) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+/* Item detail — Delete (desktop only per planning5, so kept small/muted
+   and visually separated from the read-only details above it). */
+.item-view-danger {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.link-muted {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
+  text-decoration: underline;
+}
+
+.delete-confirm {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.delete-confirm-text {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
+}
+
+.delete-confirm-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}
+
+#inv-list-state {
+  padding: var(--space-6) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.item-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-4);
+}
+
+.item-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  /* Real cards are <button>s (tap to view details) — skeleton cards
+     share this class as plain <div>s, so these resets are harmless
+     no-ops there. */
+  width: 100%;
+  background: none;
+  text-align: left;
+  appearance: none;
+  cursor: pointer;
+}
+
+.item-card-name {
+  font-weight: 600;
+}
+
+.item-card-meta {
+  display: flex;
+  gap: var(--space-2);
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
+}
+
+.item-card-expiry {
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
+}
+
+/* Loading skeleton — same .item-card shape so the layout doesn't jump
+   once real data replaces it. */
+.skeleton-card {
+  gap: var(--space-2);
+}
+
+.skeleton-line {
+  height: 12px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--muted) 25%, var(--border) 37%, var(--muted) 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+.skeleton-line-title {
+  width: 60%;
+  height: 16px;
+}
+
+.skeleton-line-meta {
+  width: 40%;
+}
+
+.skeleton-line-expiry {
+  width: 50%;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+/* New Item form */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.field label {
+  font-size: var(--text-small);
+  font-weight: 500;
+}
+
+.field-error {
+  color: var(--destructive);
+  font-size: var(--text-small);
+}
+
+.chip-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: var(--space-1) 2px var(--space-2);
+  /* Hide the native scrollbar — horizontal drag/swipe still works, this
+     is a chip shortcut row, not a content area that needs a visible
+     scroll affordance. */
+  scrollbar-width: none;
+}
+
+.chip-row::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  flex-shrink: 0;
+  white-space: nowrap;
+  line-height: 1.4;
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--foreground);
+  border-radius: var(--radius-full);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-small);
+}
+
+/* Generic active state — used by unit chips (New Item form) and category
+   filter chips (mobile Search screen) alike. */
+.chip.active {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+}
+
+/* Category badges — filled (not outlined) so they read as actual
+   badges rather than the same outline style as Unit's plain chips, with
+   room for the per-category icon. One definition, used everywhere a
+   category shows up: the interactive New Item picker and mobile Search
+   filter row, and every read-only display (Inventory/History table
+   cells, the item-view modal, the mobile Scan sheet — via
+   storageBase.buildCategoryBadge()). Sizing started matching shadcn/ui's
+   actual Badge spec exactly (pulled from its registry source), but was
+   then explicitly sized up to a 32px height on request — no longer a
+   literal match, though the shape/color logic (rounded-full, muted
+   fill, primary fill via .chip.active when selected) still traces back
+   to it. */
+.chip-category {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  overflow: hidden;
+  background: var(--muted);
+  color: var(--foreground);
+  border-color: transparent;
+  height: 32px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-small);
+  font-weight: 500;
+}
+
+.chip-category svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+/* Table-row variant (Inventory/History table cells only) — the full
+   32px badge reads as too large sitting inline in a dense table row. */
+.chip-category-sm {
+  height: 24px;
+  padding: 0 var(--space-2);
+  gap: var(--space-1);
+  font-size: 12px;
+}
+
+.chip-category-sm svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* New Item modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  z-index: 100;
+}
+
+.modal {
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100dvh - var(--space-7));
+  background: var(--background);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--muted-foreground);
+  border-radius: var(--radius-sm);
+}
+
+
+.modal-title {
+  margin: 0 0 var(--space-5);
+  font-size: var(--text-h3);
+  line-height: var(--text-h3-lh);
+}
+
+.modal-body {
+  overflow-y: auto;
+  padding: var(--space-5);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--border);
+}
+
+.modal-footer-label {
+  justify-content: space-between;
+}
+
+.footer-right {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.label-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-5) 0;
+}
+
+/* A card behind the QR itself (not just the bare canvas floating on
+   the panel background), with a mouse-tracked tilt/parallax — see
+   storageBase.initTilt() in shared.js, which sets transform/box-shadow
+   inline as the cursor moves. The transition here is what makes that
+   feel smooth rather than jumpy, and what animates it back to flat on
+   mouseleave (initTilt clears the inline styles, and the transition
+   picks up from there). */
+.qr-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: var(--muted);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.label-id {
+  font-family: var(--font-mono);
+  font-size: var(--text-p);
+}
+
+/* Desktop detail panel — key-value table (Name/Category/Amount/Expiry/
+   Note), every row always shown with a "—" placeholder when empty,
+   rather than the mobile modal's inline chips + conditionally-hidden
+   rows. */
+.detail-kv-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.detail-kv-table tr {
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-kv-table tr:last-child {
+  border-bottom: none;
+}
+
+.detail-kv-table th,
+.detail-kv-table td {
+  text-align: left;
+  padding: var(--space-3) 0;
+  font-weight: 400;
+  font-size: var(--text-small);
+  overflow-wrap: anywhere;
+}
+
+.detail-kv-table th {
+  width: 40%;
+  color: var(--muted-foreground);
+}
+
+.detail-kv-table td {
+  color: var(--foreground);
+}
+
+/* Toasts */
+.toast-container {
+  position: fixed;
+  top: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  z-index: 200;
+  width: 100%;
+  max-width: 360px;
+  padding: 0 var(--space-4);
+  pointer-events: none;
+}
+
+.toast {
+  position: relative;
+  overflow: hidden;
+  background: var(--foreground);
+  color: var(--background);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.toast-out {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+.toast-error {
+  background: var(--destructive);
+}
+
+.toast-text {
+  font-size: var(--text-small);
+}
+
+.toast-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.5);
+  transform-origin: left;
+  animation: toast-drain var(--toast-duration, 4000ms) linear forwards;
+}
+
+@keyframes toast-drain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* Scan */
+.scan-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.scan-viewfinder {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--foreground);
+}
+
+.scan-viewfinder video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.scan-frame {
+  position: absolute;
+  inset: var(--space-6);
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: var(--radius);
+  pointer-events: none;
+}
+
+.scan-permission {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  text-align: center;
+  background: var(--card-background);
+}
+
+.scan-permission .placeholder {
+  margin: 0;
+}
+
+.scan-recent-title {
+  margin: 0;
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.recent-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--foreground);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+}
+
+.recent-row-removed {
+  color: var(--muted-foreground);
+}
+
+.recent-row-name {
+  font-weight: 600;
+}
+
+.recent-row-removed .recent-row-name {
+  font-weight: 500;
+  text-decoration: line-through;
+}
+
+.recent-row-meta {
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
+}
+
+/* Item sheet (Scan → Confirm, and Recent scans detail) — full-screen,
+   sticky Cancel/Remove bar, per planning5 "an item is open" mode. */
+.item-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+}
+
+.item-sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5);
+  padding-top: calc(var(--space-6) + env(safe-area-inset-top, 0px));
+}
+
+.item-sheet-name {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-h3);
+  line-height: var(--text-h3-lh);
+}
+
+.item-sheet-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
+  margin-bottom: var(--space-3);
+}
+
+.item-sheet-notes {
+  color: var(--foreground);
+  white-space: pre-wrap;
+}
+
+.item-sheet-warning {
+  color: var(--destructive);
+}
+
+.item-sheet-id {
+  margin-top: var(--space-5);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--muted-foreground);
+}
+
+.item-sheet-bar {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--border);
+}
+
+.item-sheet-bar .btn {
+  flex: 1;
+}
+
+/* Print label (23x23mm, hidden on screen) */
+#print-label {
+  display: none;
+}
+
+@media print {
+  /* display:none (not visibility:hidden) — hidden elements still occupy
+     layout height under visibility:hidden, so the page's total content
+     height stayed the full (tall) app instead of collapsing to the
+     23mm label, and the browser printed that leftover invisible height
+     as a second, blank page. Removing the other top-level elements from
+     the layout entirely fixes it. */
+  body > *:not(#print-label) {
+    display: none !important;
+  }
+
+  #print-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 23mm;
+    height: 23mm;
+  }
+
+  #print-label canvas {
+    width: 20mm;
+    height: 20mm;
+  }
+
+  @page {
+    size: 23mm 23mm;
+    margin: 0;
+  }
+}
