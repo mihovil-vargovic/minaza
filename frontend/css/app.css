@@ -163,6 +163,14 @@ button {
   text-align: center;
 }
 
+.gate-ios-note {
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
+  line-height: var(--text-small-lh);
+  text-align: center;
+  margin: 0;
+}
+
 /* App shell */
 .app {
   height: 100dvh;

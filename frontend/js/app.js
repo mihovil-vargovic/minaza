@@ -42,6 +42,14 @@
     });
   }
 
+  // Chrome's install-banner criteria require a registered SW with a fetch
+  // handler; see sw.js for why it deliberately does no caching.
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () {});
+    });
+  }
+
   function getStoredCode() {
     return localStorage.getItem(CODE_STORAGE_KEY) || '';
   }
@@ -59,6 +67,16 @@
   const gateInput = document.getElementById('gate-input');
   const gateButton = document.getElementById('gate-button');
   const gateError = document.getElementById('gate-error');
+  const gateIosNote = document.getElementById('gate-ios-note');
+
+  // iOS keeps installed-home-screen-app storage separate from Safari, so a
+  // Safari-only login won't carry over — see planning5 §iOS PWA.
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  var isStandalone = window.navigator.standalone === true ||
+    window.matchMedia('(display-mode: standalone)').matches;
+  if (isIOS && !isStandalone) {
+    gateIosNote.hidden = false;
+  }
 
   function showGate() {
     gateEl.hidden = false;
