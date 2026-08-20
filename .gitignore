@@ -8,3 +8,6 @@ config.local.js
 config.local.json
 
 .DS_Store
+
+# Internal planning/progress docs — not for the public repo.
+_prd/
