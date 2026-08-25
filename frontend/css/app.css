@@ -242,19 +242,12 @@ button {
   color: var(--muted-foreground);
 }
 
-/* Settings — real content on mobile (Devices/Version/Changelog),
-   placeholder-only on desktop per planning5. */
-.settings-mobile {
-  display: none;
-}
-
-@media (max-width: 767px) {
-  .settings-desktop-placeholder {
-    display: none;
-  }
-
-  .settings-mobile {
-    display: block;
+/* Settings — same Devices/Version/Changelog content on both desktop and
+   mobile; constrained to a readable column on desktop instead of
+   stretching edge-to-edge across the wide content pane. */
+@media (min-width: 768px) {
+  .settings-content {
+    max-width: 480px;
   }
 }
 
