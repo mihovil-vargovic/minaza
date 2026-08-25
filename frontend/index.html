@@ -4,21 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Storage Base</title>
-<link rel="manifest" href="manifest.webmanifest?v=41">
-<meta name="theme-color" content="#efeff0">
+<link rel="manifest" href="manifest.webmanifest?v=47">
+<meta name="theme-color" content="#fafafa">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Storage Base">
-<link rel="stylesheet" href="css/tokens.css?v=41">
-<link rel="stylesheet" href="css/app.css?v=41">
+<link rel="stylesheet" href="css/tokens.css?v=47">
+<link rel="stylesheet" href="css/app.css?v=47">
 </head>
 <body>
 
 <div id="gate" class="gate">
   <form id="gate-form" class="gate-card">
-    <div class="gate-icon">🔒</div>
     <h1 class="gate-title">Storage Base</h1>
     <input id="gate-input" class="gate-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Access code">
     <div id="gate-error" class="gate-error" hidden></div>
@@ -73,7 +72,7 @@
                   <th>Name</th>
                   <th>Category</th>
                   <th>Amount</th>
-                  <th>Expiry</th>
+                  <th class="inv-th-expiry">Expiry</th>
                 </tr>
               </thead>
               <tbody id="inv-table-body"></tbody>
@@ -126,7 +125,7 @@
         </aside>
       </div>
     </section>
-    <section class="view-panel" data-view-panel="history" hidden>
+    <section class="view-panel" data-view-panel="history" data-nav="push" hidden>
       <div class="page-header">
         <button id="hist-back-btn" class="btn-icon hist-back-btn" type="button" data-view="inventory" aria-label="Back to Inventory">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -148,6 +147,7 @@
           <tbody id="hist-list"></tbody>
         </table>
       </div>
+      <div id="hist-cards" class="hist-cards"></div>
     </section>
     <section class="view-panel" data-view-panel="settings" hidden>
       <h2>Settings</h2>
@@ -311,9 +311,15 @@
         <div id="iv-qr" class="qr-box"></div>
         <div id="iv-id" class="label-id"></div>
       </div>
-      <div id="iv-meta" class="item-sheet-meta"></div>
-      <div id="iv-expiry" class="item-card-expiry" hidden></div>
-      <p id="iv-notes" class="item-sheet-notes" hidden></p>
+      <table class="detail-kv-table">
+        <tbody>
+          <tr><th>Name</th><td id="iv-kv-name"></td></tr>
+          <tr><th>Category</th><td id="iv-kv-category"></td></tr>
+          <tr><th>Amount</th><td id="iv-kv-amount"></td></tr>
+          <tr><th>Expiry</th><td id="iv-kv-expiry"></td></tr>
+          <tr><th>Note</th><td id="iv-kv-notes"></td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -335,13 +341,13 @@
 <script src="config.local.js"></script>
 <script src="js/vendor/qrcode.min.js"></script>
 <script src="js/vendor/jsQR.min.js"></script>
-<script src="js/shared.js?v=41"></script>
-<script src="js/app.js?v=41"></script>
-<script src="js/toast.js?v=41"></script>
-<script src="js/inventory.js?v=41"></script>
-<script src="js/history.js?v=41"></script>
-<script src="js/search.js?v=41"></script>
-<script src="js/scan.js?v=41"></script>
+<script src="js/shared.js?v=47"></script>
+<script src="js/app.js?v=47"></script>
+<script src="js/toast.js?v=47"></script>
+<script src="js/inventory.js?v=47"></script>
+<script src="js/history.js?v=47"></script>
+<script src="js/search.js?v=47"></script>
+<script src="js/scan.js?v=47"></script>
 <script>window.storageBase.init();</script>
 </body>
 </html>

@@ -3,6 +3,7 @@
 
   var stateEl = document.getElementById('hist-list-state');
   var listEl = document.getElementById('hist-list');
+  var cardsEl = document.getElementById('hist-cards');
 
   // Stale-while-revalidate, same as inventory.js's loadItems() — only
   // the first load shows the loading state; every re-entry after that
@@ -36,11 +37,13 @@
       stateEl.hidden = true;
       listEl.hidden = false;
       listEl.innerHTML = '';
+      cardsEl.innerHTML = '';
       return;
     }
 
     listEl.hidden = true;
     listEl.innerHTML = ''; // don't leave stale rows behind a hidden container — see loadHistory()'s stale-while-revalidate note
+    cardsEl.innerHTML = '';
     stateEl.hidden = false;
     stateEl.innerHTML = '';
 
@@ -75,9 +78,54 @@
     setState(null);
 
     listEl.innerHTML = '';
+    cardsEl.innerHTML = '';
     items.forEach(function (item) {
       listEl.appendChild(buildRow(item));
+      cardsEl.appendChild(buildCard(item));
     });
+  }
+
+  // Mobile-only card, reusing the same .detail-kv-table label:value
+  // pattern the desktop Inventory detail panel already uses, since a
+  // 5-column table doesn't fit a phone width.
+  function buildCard(item) {
+    var card = document.createElement('div');
+    card.className = 'hist-card';
+
+    var table = document.createElement('table');
+    table.className = 'detail-kv-table';
+
+    function row(label, valueText, valueNode) {
+      var tr = document.createElement('tr');
+      var th = document.createElement('th');
+      th.textContent = label;
+      var td = document.createElement('td');
+      if (valueNode) {
+        td.appendChild(valueNode);
+      } else {
+        td.textContent = valueText || '—';
+      }
+      tr.appendChild(th);
+      tr.appendChild(td);
+      table.appendChild(tr);
+    }
+
+    row('Name', item.name);
+    row('Category', null, item.category ? storageBase.buildCategoryBadge(item.category) : null);
+    row('Amount', item.amount + ' ' + item.unit);
+    row('Removed', formatRemovedDate(item.removedAt));
+    card.appendChild(table);
+
+    var restoreBtn = document.createElement('button');
+    restoreBtn.type = 'button';
+    restoreBtn.className = 'btn btn-secondary';
+    restoreBtn.textContent = 'Restore';
+    restoreBtn.addEventListener('click', function () {
+      restore(item, restoreBtn);
+    });
+    card.appendChild(restoreBtn);
+
+    return card;
   }
 
   function buildRow(item) {

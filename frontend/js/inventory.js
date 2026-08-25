@@ -55,9 +55,13 @@
   var ivTitle = document.getElementById('item-view-title');
   var ivQr = document.getElementById('iv-qr');
   var ivId = document.getElementById('iv-id');
-  var ivMeta = document.getElementById('iv-meta');
-  var ivExpiry = document.getElementById('iv-expiry');
-  var ivNotes = document.getElementById('iv-notes');
+  var ivKv = {
+    name: document.getElementById('iv-kv-name'),
+    category: document.getElementById('iv-kv-category'),
+    amount: document.getElementById('iv-kv-amount'),
+    expiry: document.getElementById('iv-kv-expiry'),
+    notes: document.getElementById('iv-kv-notes')
+  };
 
   var detailEmpty = document.getElementById('inv-detail-empty');
   var detailContent = document.getElementById('inv-detail-content');
@@ -466,8 +470,12 @@
     };
   }
 
+  // Mobile item view now renders the same label:value kv-table as the
+  // desktop panel (refs.kv branch in createDetailController), not its own
+  // inline-chip layout — same fields, same "one row per field" logic,
+  // just presented in a bottom sheet instead of a side panel.
   var modalController = createDetailController({
-    title: ivTitle, qr: ivQr, id: ivId, meta: ivMeta, expiry: ivExpiry, notes: ivNotes, qrSize: 160
+    title: ivTitle, qr: ivQr, id: ivId, kv: ivKv, qrSize: 160
   });
 
   var panelController = createDetailController({

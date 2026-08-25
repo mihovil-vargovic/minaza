@@ -125,11 +125,6 @@ button {
   gap: var(--space-4);
 }
 
-.gate-icon {
-  font-size: 32px;
-  text-align: center;
-}
-
 .gate-title {
   font-size: var(--text-h3);
   line-height: var(--text-h3-lh);
@@ -151,6 +146,14 @@ button {
 .gate-button:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 1px;
+}
+
+/* Matches shadcn/ui's Input aria-invalid convention
+   (border-destructive + ring-destructive/20) — the field itself carries
+   the error state, not just the message below it. */
+.gate-input[aria-invalid="true"] {
+  border-color: var(--destructive);
+  box-shadow: 0 0 0 3px rgb(239 68 68 / 0.2);
 }
 
 .gate-button {
@@ -329,10 +332,39 @@ button {
   }
 
   .content {
+    position: relative;
+    /* Clips the off-screen edge of a panel mid-slide during a push/pop
+       nav transition (see app.js animateNav) instead of causing a
+       horizontal scrollbar. */
+    overflow: hidden;
     margin: 0;
     border-radius: 0;
     box-shadow: none;
+    /* No padding here any more — .view-panel is absolutely positioned
+       (inset: 0) to fill .content, and an abspos child's inset is
+       measured against the parent's padding box, so padding set here
+       would sit outside the child entirely (this is what broke every
+       screen's edge spacing). Padding now lives on .view-panel itself
+       instead, below. */
+    padding: 0;
+  }
+
+  /* Absolutely positioned (filling .content, same area a normally-flowed
+     panel would occupy) so two panels can overlap during a push/pop
+     transition instead of stacking vertically; each panel scrolls
+     independently since .content itself no longer does (see overflow:
+     hidden above). Carries the padding .content used to have — see the
+     note on .content above for why it has to live here now. */
+  .view-panel {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
     padding: var(--space-4);
+    /* The status bar is translucent (see apple-mobile-web-app-status-
+       bar-style) so it reads as one continuous background rather than a
+       separately-colored bar — this keeps the header row clear of the
+       notch/status bar area instead of drawing underneath it. */
+    padding-top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
     /* Clears the floating tab bar: its own height (56px) + its inset
        from the viewport bottom + a visual gap above it. */
     padding-bottom: calc(56px + var(--space-6) + env(safe-area-inset-bottom, 0px));
@@ -636,6 +668,14 @@ button {
   .inv-row td {
     padding: var(--space-2) var(--space-3);
   }
+
+  /* Expiry doesn't fit mobile's tighter width — scoped to Inventory's
+     table body specifically since History reuses the same
+     .inv-row-expiry class for its own "Removed" column, which stays. */
+  .inv-th-expiry,
+  #inv-table-body .inv-row-expiry {
+    display: none;
+  }
 }
 
 .inv-controls {
@@ -655,9 +695,14 @@ button {
 }
 
 @media (max-width: 767px) {
+  /* Every child of .inv-controls is hidden on mobile (search/filter moved
+     to the Search tab, +New is desktop-only — see below), so the
+     container itself is hidden too rather than left as an empty
+     full-width flex item: it was previously still forcing a wrap (via
+     width: 100%) and adding a phantom row of empty vertical space below
+     the title/history-icon row. */
   .inv-controls {
-    flex-wrap: wrap;
-    width: 100%;
+    display: none;
   }
 
   /* Search (text query + category filter) is its own tab on mobile now
@@ -672,6 +717,16 @@ button {
   /* Item creation is desktop-only (see planning5 Preparation flow). */
   #inv-new-btn {
     display: none;
+  }
+
+  /* The desktop align-self: flex-start on .page-header h2 (below) exists
+     to line the title up with History/Settings' flush-top titles next to
+     Inventory's own taller multi-control row — on mobile there's no such
+     row, just the title beside the 40px history-icon button, so
+     flex-start instead left the (shorter) title's center sitting above
+     the button's. Centering both in the same line aligns them. */
+  [data-view-panel="inventory"] .page-header h2 {
+    align-self: center;
   }
 }
 
@@ -772,6 +827,60 @@ button {
   .inv-history-btn,
   .hist-back-btn {
     display: inline-flex;
+  }
+
+  /* Centered title, iOS nav-bar style — the back button is pulled out of
+     flow so it can't push the title off-center depending on its own
+     width. */
+  [data-view-panel="history"] .page-header {
+    position: relative;
+    justify-content: center;
+  }
+
+  [data-view-panel="history"] .page-header h2 {
+    margin: 0;
+  }
+
+  [data-view-panel="history"] .hist-back-btn {
+    position: absolute;
+    left: 0;
+  }
+}
+
+/* Mobile History: card list instead of the table (shared with desktop
+   via .inv-table-card/.inv-table above) — a 5-column table doesn't fit a
+   phone width without cramming or scrolling every row. Each item's
+   Name/Category/Amount/Removed render as label:value rows reusing
+   .detail-kv-table (same pattern as the desktop Inventory detail panel),
+   with Restore as its own full-width row at the bottom. */
+.hist-cards {
+  display: none;
+}
+
+.hist-card {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.hist-card:last-child {
+  margin-bottom: 0;
+}
+
+.hist-card .btn {
+  width: 100%;
+  margin-top: var(--space-3);
+}
+
+@media (max-width: 767px) {
+  [data-view-panel="history"] .inv-table-card {
+    display: none;
+  }
+
+  [data-view-panel="history"] .hist-cards {
+    display: block;
   }
 }
 
@@ -1020,6 +1129,7 @@ button {
   background: var(--muted);
   color: var(--foreground);
   border-color: transparent;
+  border-radius: var(--radius-full);
   height: 32px;
   padding: 0 var(--space-3);
   font-size: var(--text-small);
@@ -1082,6 +1192,26 @@ button {
   line-height: 1;
   color: var(--muted-foreground);
   border-radius: var(--radius-sm);
+}
+
+/* Mobile Inventory item view: a bottom sheet, not the full-screen modal
+   every other .modal-overlay/.modal uses (New Item stays as-is — this is
+   scoped to #item-view-modal specifically). Anchored to the bottom edge,
+   rounded top corners only, sized to its content instead of the full
+   viewport height. */
+@media (max-width: 767px) {
+  #item-view-modal.modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  #item-view-modal .modal {
+    max-width: none;
+    height: auto;
+    max-height: 85dvh;
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }
 
 

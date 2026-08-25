@@ -102,10 +102,12 @@
   function showGateError(message) {
     gateError.textContent = message;
     gateError.hidden = false;
+    gateInput.setAttribute('aria-invalid', 'true');
   }
   function clearGateError() {
     gateError.hidden = true;
     gateError.textContent = '';
+    gateInput.removeAttribute('aria-invalid');
   }
 
   function attemptUnlock(code) {
@@ -189,6 +191,63 @@
   var currentView = 'inventory';
   var viewShownCallbacks = {};
   var viewHiddenCallbacks = {};
+  var navAnimating = false;
+  var NAV_TRANSITION_MS = 320;
+
+  function isMobile() {
+    return !window.matchMedia('(min-width: 768px)').matches;
+  }
+  function panelFor(view) {
+    return document.querySelector('.view-panel[data-view-panel="' + view + '"]');
+  }
+  function isPushView(view) {
+    var el = panelFor(view);
+    return !!el && el.dataset.nav === 'push';
+  }
+  // Slides the incoming panel over the outgoing one like a native iOS
+  // push/pop (only used for push-style screens, e.g. History reached from
+  // Inventory — tab-bar switches stay instant, matching real iOS tab bars,
+  // which don't animate either).
+  function animateNav(fromPanel, toPanel, direction) {
+    navAnimating = true;
+    toPanel.hidden = false;
+    toPanel.style.transition = 'none';
+    fromPanel.style.transition = 'none';
+    if (direction === 'forward') {
+      toPanel.style.transform = 'translateX(100%)';
+      fromPanel.style.transform = 'translateX(0)';
+      fromPanel.style.filter = 'brightness(1)';
+    } else {
+      toPanel.style.transform = 'translateX(-25%)';
+      toPanel.style.filter = 'brightness(0.85)';
+      fromPanel.style.transform = 'translateX(0)';
+      fromPanel.style.filter = 'brightness(1)';
+    }
+    void toPanel.offsetWidth; // force layout so the transition below animates from the state just set, not the previous one
+    var transition = 'transform ' + NAV_TRANSITION_MS + 'ms cubic-bezier(0.32, 0.72, 0, 1), filter ' + NAV_TRANSITION_MS + 'ms ease';
+    toPanel.style.transition = transition;
+    fromPanel.style.transition = transition;
+    requestAnimationFrame(function () {
+      if (direction === 'forward') {
+        toPanel.style.transform = 'translateX(0)';
+        fromPanel.style.transform = 'translateX(-25%)';
+        fromPanel.style.filter = 'brightness(0.85)';
+      } else {
+        toPanel.style.transform = 'translateX(0)';
+        toPanel.style.filter = 'brightness(1)';
+        fromPanel.style.transform = 'translateX(100%)';
+      }
+    });
+    setTimeout(function () {
+      fromPanel.hidden = true;
+      [fromPanel, toPanel].forEach(function (panel) {
+        panel.style.transition = '';
+        panel.style.transform = '';
+        panel.style.filter = '';
+      });
+      navAnimating = false;
+    }, NAV_TRANSITION_MS + 30);
+  }
   function onViewShown(view, fn) {
     (viewShownCallbacks[view] = viewShownCallbacks[view] || []).push(fn);
   }
@@ -202,19 +261,45 @@
     (viewHiddenCallbacks[view] || []).forEach(function (fn) { fn(); });
   }
 
-  function setView(view) {
-    currentView = view;
-    document.querySelectorAll('.view-panel').forEach(function (panel) {
-      panel.hidden = panel.dataset.viewPanel !== view;
-    });
+  function setActiveNav(view) {
     document.querySelectorAll('[data-view]').forEach(function (btn) {
       btn.classList.toggle('active', btn.dataset.view === view);
     });
   }
 
+  function showViewInstant(view) {
+    document.querySelectorAll('.view-panel').forEach(function (panel) {
+      panel.hidden = panel.dataset.viewPanel !== view;
+    });
+  }
+
+  function setView(view) {
+    currentView = view;
+    showViewInstant(view);
+    setActiveNav(view);
+  }
+
   function navigateTo(view) {
     var prev = currentView;
-    setView(view);
+    if (prev === view) {
+      // Same view re-tapped (e.g. the active tab again) — not a real nav,
+      // nothing to animate, but keep firing hidden/shown so a re-tap can
+      // still trigger a refresh the way it always has.
+      fireViewHidden(prev);
+      if (!appEl.hidden) fireViewShown(view);
+      return;
+    }
+    var prevPanel = panelFor(prev);
+    var nextPanel = panelFor(view);
+    currentView = view;
+    setActiveNav(view);
+
+    if (isMobile() && !navAnimating && prevPanel && nextPanel && (isPushView(view) || isPushView(prev))) {
+      animateNav(prevPanel, nextPanel, isPushView(view) ? 'forward' : 'back');
+    } else {
+      showViewInstant(view);
+    }
+
     fireViewHidden(prev);
     if (!appEl.hidden) fireViewShown(view);
   }

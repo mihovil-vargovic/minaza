@@ -11,3 +11,4 @@ config.local.json
 
 # Internal planning/progress docs — not for the public repo.
 _prd/
+_iteration/
