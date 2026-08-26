@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Storage Base</title>
-<link rel="manifest" href="manifest.webmanifest?v=48">
+<link rel="manifest" href="manifest.webmanifest?v=49">
 <meta name="theme-color" content="#fafafa">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Storage Base">
-<link rel="stylesheet" href="css/tokens.css?v=48">
-<link rel="stylesheet" href="css/app.css?v=48">
+<link rel="stylesheet" href="css/tokens.css?v=49">
+<link rel="stylesheet" href="css/app.css?v=49">
 </head>
 <body>
 
@@ -60,7 +60,7 @@
                 <div id="inv-category-menu" class="category-menu" hidden></div>
               </div>
               <button id="inv-category-clear" class="chip-clear" type="button" aria-label="Clear category filter" hidden>&times;</button>
-              <button id="inv-new-btn" class="btn btn-primary" type="button">+ New item</button>
+              <button id="inv-new-btn" class="btn btn-primary" type="button">New item</button>
             </div>
           </div>
           <div id="inv-list-state" hidden></div>
@@ -170,17 +170,21 @@
 
         <section class="settings-section">
           <h3 class="settings-section-title">Version</h3>
-          <p class="settings-version">Storage Base 1.0.0</p>
+          <ul class="settings-device-list">
+            <li class="settings-device-row">
+              <span>Storage Base 1.0.0</span>
+            </li>
+          </ul>
         </section>
 
         <section class="settings-section">
           <h3 class="settings-section-title">Changelog</h3>
-          <ul class="settings-changelog">
-            <li>History, Delete &amp; Restore</li>
-            <li>Mobile Scan &amp; Remove</li>
-            <li>Desktop Inventory &amp; New Item</li>
-            <li>App shell &amp; access gate</li>
-            <li>Backend foundation</li>
+          <ul class="settings-device-list settings-changelog">
+            <li class="settings-device-row">History, Delete &amp; Restore</li>
+            <li class="settings-device-row">Mobile Scan &amp; Remove</li>
+            <li class="settings-device-row">Desktop Inventory &amp; New Item</li>
+            <li class="settings-device-row">App shell &amp; access gate</li>
+            <li class="settings-device-row">Backend foundation</li>
           </ul>
         </section>
       </div>
@@ -340,13 +344,13 @@
 <script src="config.local.js"></script>
 <script src="js/vendor/qrcode.min.js"></script>
 <script src="js/vendor/jsQR.min.js"></script>
-<script src="js/shared.js?v=48"></script>
-<script src="js/app.js?v=48"></script>
-<script src="js/toast.js?v=48"></script>
-<script src="js/inventory.js?v=48"></script>
-<script src="js/history.js?v=48"></script>
-<script src="js/search.js?v=48"></script>
-<script src="js/scan.js?v=48"></script>
+<script src="js/shared.js?v=49"></script>
+<script src="js/app.js?v=49"></script>
+<script src="js/toast.js?v=49"></script>
+<script src="js/inventory.js?v=49"></script>
+<script src="js/history.js?v=49"></script>
+<script src="js/search.js?v=49"></script>
+<script src="js/scan.js?v=49"></script>
 <script>window.storageBase.init();</script>
 </body>
 </html>
