@@ -592,7 +592,7 @@ button {
 }
 
 .inv-row-name {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--foreground);
   font-size: var(--text-p);
 }
@@ -1300,6 +1300,13 @@ button {
 
 .modal-footer-label {
   justify-content: space-between;
+}
+
+/* Read-only sheet, single action — full-width like the Scan sheet's
+   .item-sheet-bar buttons, instead of .modal-footer's default
+   flex-end-aligned pair sized to their label. */
+.item-view-footer .btn {
+  flex: 1;
 }
 
 .footer-right {
