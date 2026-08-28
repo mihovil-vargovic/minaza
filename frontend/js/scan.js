@@ -32,29 +32,54 @@
   var currentItem = null;
 
   // ---- camera lifecycle ----
+  // Switching away from Scan (to Inventory/History/Settings/Search) only
+  // pauses the loop — it does NOT release the camera. Fully stopping the
+  // stream's tracks tears down the hardware grant, so the next visit
+  // needs a brand-new getUserMedia() negotiation, which several browsers
+  // resurface as a fresh permission prompt even though the site was
+  // already granted access. Keeping the stream alive across in-app tab
+  // switches avoids that; the camera is only actually released when the
+  // page itself is backgrounded/closed (see the visibility handling
+  // below) — the same lifecycle a native scanner app would use.
   function startCamera() {
-    if (stream || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) showPermissionState();
+    permissionState.hidden = true;
+    if (stream) {
+      resumeScanning();
       return;
     }
-    permissionState.hidden = true;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showPermissionState();
+      return;
+    }
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
       .then(function (s) {
         stream = s;
         video.srcObject = s;
-        video.play();
-        scanning = true;
-        rafId = requestAnimationFrame(tick);
+        resumeScanning();
       })
       .catch(function () {
         showPermissionState();
       });
   }
 
-  function stopCamera() {
+  function resumeScanning() {
+    video.play();
+    scanning = true;
+    if (!rafId) rafId = requestAnimationFrame(tick);
+  }
+
+  // Pauses the scan loop when leaving the tab — cheap, instant to resume,
+  // and doesn't touch the underlying stream.
+  function pauseCamera() {
     scanning = false;
     if (rafId) cancelAnimationFrame(rafId);
     rafId = null;
+  }
+
+  // Full teardown — only called when the page itself goes away, not on
+  // ordinary in-app tab switches (see the comment above startCamera()).
+  function stopCameraHard() {
+    pauseCamera();
     if (stream) {
       stream.getTracks().forEach(function (t) { t.stop(); });
       stream = null;
@@ -67,6 +92,15 @@
   }
 
   permissionRetry.addEventListener('click', startCamera);
+
+  // visibilitychange covers app-switch/screen-lock; pagehide covers an
+  // actual navigation away/tab close that visibilitychange can miss on
+  // some browsers (notably older iOS Safari bfcache behavior). Both call
+  // the same idempotent teardown.
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) stopCameraHard();
+  });
+  window.addEventListener('pagehide', stopCameraHard);
 
   function tick() {
     if (!scanning) return;
@@ -272,7 +306,7 @@
   }
 
   storageBase.onViewShown('scan', startCamera);
-  storageBase.onViewHidden('scan', stopCamera);
+  storageBase.onViewHidden('scan', pauseCamera);
 
   renderRecent();
 })();
