@@ -195,7 +195,7 @@
   var NAV_TRANSITION_MS = 320;
 
   function isMobile() {
-    return !window.matchMedia('(min-width: 768px)').matches;
+    return !window.matchMedia('(min-width: 1024px)').matches;
   }
   function panelFor(view) {
     return document.querySelector('.view-panel[data-view-panel="' + view + '"]');

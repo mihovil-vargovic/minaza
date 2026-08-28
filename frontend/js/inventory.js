@@ -10,7 +10,7 @@
   var selectedItemId = null; // desktop detail-panel selection only
 
   function isDesktop() {
-    return window.matchMedia('(min-width: 768px)').matches;
+    return window.matchMedia('(min-width: 1024px)').matches;
   }
 
   // ---- DOM refs ----
