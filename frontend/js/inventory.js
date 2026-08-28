@@ -52,7 +52,6 @@
 
   var ivOverlay = document.getElementById('item-view-modal');
   var ivCloseBtn = document.getElementById('iv-close');
-  var ivTitle = document.getElementById('item-view-title');
   var ivQr = document.getElementById('iv-qr');
   var ivId = document.getElementById('iv-id');
   var ivKv = {
@@ -271,7 +270,7 @@
         selectDesktopItem(item);
       } else {
         modalController.render(item);
-        ivOverlay.hidden = false;
+        openItemView();
       }
     });
 
@@ -327,7 +326,7 @@
           return;
         }
         modalController.render(res.item);
-        ivOverlay.hidden = false;
+        openItemView();
       }).catch(function (err) {
         storageBase.toast(err.message || 'Could not reach the backend.', { type: 'error' });
       });
@@ -336,8 +335,33 @@
     return card;
   }
 
-  ivCloseBtn.addEventListener('click', function () {
-    ivOverlay.hidden = true;
+  // Native iOS bottom-sheet feel: slide up/down + backdrop fade instead
+  // of the old instant hidden-attribute snap. Duration matches the CSS
+  // transition on #item-view-modal (see app.css) — the setTimeout in
+  // closeItemView() just needs to outlast it before hiding for real.
+  var IV_TRANSITION_MS = 320;
+  var ivClosing = false;
+
+  function openItemView() {
+    ivClosing = false;
+    ivOverlay.hidden = false;
+    void ivOverlay.offsetWidth; // force layout so is-open's transition starts from the closed state, not skips straight to open
+    ivOverlay.classList.add('is-open');
+  }
+
+  function closeItemView() {
+    if (ivOverlay.hidden || ivClosing) return;
+    ivClosing = true;
+    ivOverlay.classList.remove('is-open');
+    setTimeout(function () {
+      ivOverlay.hidden = true;
+      ivClosing = false;
+    }, IV_TRANSITION_MS);
+  }
+
+  ivCloseBtn.addEventListener('click', closeItemView);
+  ivOverlay.addEventListener('click', function (e) {
+    if (e.target === ivOverlay) closeItemView();
   });
 
   // ---- Shared detail rendering + delete flow, used by both the desktop
@@ -352,7 +376,7 @@
       item = it;
       if (hasDelete) resetDeleteConfirm();
 
-      refs.title.textContent = it.name || '';
+      if (refs.title) refs.title.textContent = it.name || '';
 
       refs.qr.innerHTML = '';
       new QRCode(refs.qr, {
@@ -476,7 +500,7 @@
   // inline-chip layout — same fields, same "one row per field" logic,
   // just presented in a bottom sheet instead of a side panel.
   var modalController = createDetailController({
-    title: ivTitle, qr: ivQr, id: ivId, kv: ivKv, qrSize: 160
+    qr: ivQr, id: ivId, kv: ivKv, qrSize: 160
   });
 
   var panelController = createDetailController({
@@ -790,7 +814,7 @@
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;
     if (!overlay.hidden) closeModal();
-    else if (!ivOverlay.hidden) ivOverlay.hidden = true;
+    else if (!ivOverlay.hidden) closeItemView();
   });
 
   submitBtn.addEventListener('click', function () {
