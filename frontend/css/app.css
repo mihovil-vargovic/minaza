@@ -299,8 +299,14 @@ button {
 }
 
 .settings-changelog .settings-device-row {
+  justify-content: space-between;
+  gap: var(--space-4);
   color: var(--muted-foreground);
   font-size: var(--text-small);
+}
+
+.settings-changelog-date {
+  flex-shrink: 0;
 }
 
 .tabbar {
@@ -344,6 +350,12 @@ button {
     position: absolute;
     inset: 0;
     overflow-y: auto;
+    /* Opaque — during a push/pop transition both panels are visible and
+       overlapping at once (see animateNav in app.js); without its own
+       background here, whichever panel is behind shows through any gap
+       in the front one's content (e.g. Inventory's header controls
+       bleeding through History's mostly-empty centered-title header). */
+    background: var(--card-background);
     padding: var(--space-4);
     /* The status bar is translucent (see apple-mobile-web-app-status-
        bar-style) so it reads as one continuous background rather than a
@@ -659,6 +671,21 @@ button {
      .inv-row-expiry class for its own "Removed" column, which stays. */
   .inv-th-expiry,
   #inv-table-body .inv-row-expiry {
+    display: none;
+  }
+
+  /* Category badge loses its text label on mobile Inventory, icon only
+     — frees up width for the Item column. Scoped to #inv-table-body
+     specifically, same reasoning as Expiry above (History's own table
+     is hidden entirely on mobile in favor of .hist-cards, so this never
+     applies there anyway). */
+  #inv-table-body .inv-row-category .chip-category-sm {
+    gap: 0;
+    padding: 0 var(--space-2);
+    width: 24px;
+  }
+
+  #inv-table-body .inv-row-category .chip-category-label {
     display: none;
   }
 }

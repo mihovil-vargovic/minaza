@@ -55,6 +55,7 @@
     el.className = (opts && opts.small) ? 'chip-category chip-category-sm' : 'chip-category';
     el.innerHTML = categoryIconSvg(name);
     var label = document.createElement('span');
+    label.className = 'chip-category-label';
     label.textContent = name;
     el.appendChild(label);
     return el;

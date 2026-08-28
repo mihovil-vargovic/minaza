@@ -251,6 +251,7 @@
     tr.appendChild(nameTd);
 
     var catTd = document.createElement('td');
+    catTd.className = 'inv-row-category';
     if (item.category) {
       catTd.appendChild(storageBase.buildCategoryBadge(item.category, { small: true }));
     }
