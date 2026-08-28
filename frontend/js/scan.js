@@ -275,10 +275,15 @@
   function renderRecent() {
     recentList.innerHTML = '';
     if (recentScans.length === 0) {
+      // Same .item-card shell the recent rows/Inventory use elsewhere,
+      // so the empty state reads as a card rather than bare floating text.
+      var card = document.createElement('div');
+      card.className = 'item-card scan-empty-card';
       var p = document.createElement('p');
       p.className = 'placeholder';
       p.textContent = 'Scanned items will appear here.';
-      recentList.appendChild(p);
+      card.appendChild(p);
+      recentList.appendChild(card);
       return;
     }
     recentScans.forEach(function (item) {

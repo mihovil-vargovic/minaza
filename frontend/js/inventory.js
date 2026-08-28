@@ -154,18 +154,46 @@
     }
   }
 
+  // Each column's placeholder mirrors the shape of what actually renders
+  // there (see buildRow below) — the category cell is a pill, not a text
+  // line, since it stands in for the category badge. The category and
+  // expiry cells also carry the same classes their real counterparts do
+  // (.inv-row-category / .inv-row-expiry) so the existing mobile rules
+  // that shrink the category badge to icon-only and hide Expiry entirely
+  // apply to the skeleton too, instead of it showing a column that never
+  // actually exists once items load.
   function renderSkeleton() {
     tableBody.innerHTML = '';
     for (var i = 0; i < 4; i++) {
       var tr = document.createElement('tr');
       tr.className = 'inv-row skeleton-row';
-      for (var c = 0; c < 4; c++) {
-        var td = document.createElement('td');
-        var line = document.createElement('div');
-        line.className = 'skeleton-line';
-        td.appendChild(line);
-        tr.appendChild(td);
-      }
+
+      var nameTd = document.createElement('td');
+      var nameLine = document.createElement('div');
+      nameLine.className = 'skeleton-line skeleton-line-inv-name';
+      nameTd.appendChild(nameLine);
+      tr.appendChild(nameTd);
+
+      var catTd = document.createElement('td');
+      catTd.className = 'inv-row-category';
+      var catPill = document.createElement('div');
+      catPill.className = 'skeleton-line skeleton-pill-inv-category';
+      catTd.appendChild(catPill);
+      tr.appendChild(catTd);
+
+      var amtTd = document.createElement('td');
+      var amtLine = document.createElement('div');
+      amtLine.className = 'skeleton-line skeleton-line-inv-amount';
+      amtTd.appendChild(amtLine);
+      tr.appendChild(amtTd);
+
+      var expTd = document.createElement('td');
+      expTd.className = 'inv-row-expiry';
+      var expLine = document.createElement('div');
+      expLine.className = 'skeleton-line skeleton-line-inv-expiry';
+      expTd.appendChild(expLine);
+      tr.appendChild(expTd);
+
       tableBody.appendChild(tr);
     }
   }

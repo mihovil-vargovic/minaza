@@ -609,9 +609,28 @@ button {
   padding: var(--space-3) var(--space-4);
 }
 
-.skeleton-row .skeleton-line {
+/* Sized/shaped after the real cells they stand in for (see buildRow in
+   inventory.js) — name is a bold text-p line, category is the
+   chip-category-sm pill (not text), amount/expiry are short values. */
+.skeleton-line-inv-name {
+  height: 16px;
+  width: 55%;
+}
+
+.skeleton-pill-inv-category {
+  height: 24px;
+  width: 72px;
+  border-radius: var(--radius-full);
+}
+
+.skeleton-line-inv-amount {
   height: 14px;
-  width: 70%;
+  width: 44px;
+}
+
+.skeleton-line-inv-expiry {
+  height: 14px;
+  width: 64px;
 }
 
 .inventory-detail-empty {
@@ -687,6 +706,12 @@ button {
 
   #inv-table-body .inv-row-category .chip-category-label {
     display: none;
+  }
+
+  /* Matches the icon-only badge width above, so the loading skeleton's
+     category pill isn't wider than the real thing it's standing in for. */
+  .skeleton-pill-inv-category {
+    width: 24px;
   }
 }
 
@@ -1423,10 +1448,11 @@ button {
 .scan-viewfinder {
   position: relative;
   aspect-ratio: 1 / 1;
-  width: 100%;
-  max-width: 360px;
-  margin: 0 auto;
-  border-radius: var(--radius);
+  /* Full-bleed: breaks out of .view-panel's horizontal padding so the
+     camera reaches both screen edges instead of sitting in a capped-width
+     card. */
+  width: calc(100% + var(--space-4) * 2);
+  margin: 0 calc(var(--space-4) * -1);
   overflow: hidden;
   background: var(--foreground);
 }
@@ -1444,6 +1470,9 @@ button {
   border: 2px solid rgba(255, 255, 255, 0.7);
   border-radius: var(--radius);
   pointer-events: none;
+  /* Dims everything outside the frame; the huge spread combined with the
+     viewfinder's own overflow:hidden clips it to exactly that area. */
+  box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.55);
 }
 
 .scan-permission {
@@ -1460,6 +1489,18 @@ button {
 }
 
 .scan-permission .placeholder {
+  margin: 0;
+}
+
+/* .item-card is left-aligned/button-shaped by default (real rows are
+   tappable) — this empty state is neither, so center it. */
+.scan-empty-card {
+  align-items: center;
+  text-align: center;
+  cursor: default;
+}
+
+.scan-empty-card .placeholder {
   margin: 0;
 }
 
