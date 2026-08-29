@@ -143,7 +143,7 @@
       p.textContent = 'Could not load inventory.';
       var retry = document.createElement('button');
       retry.type = 'button';
-      retry.className = 'btn btn-secondary';
+      retry.className = 'btn btn-tertiary';
       retry.textContent = 'Retry';
       retry.addEventListener('click', loadItems);
       stateEl.appendChild(retry);
@@ -364,27 +364,38 @@
   }
 
   // Native iOS bottom-sheet feel: slide up/down + backdrop fade instead
-  // of the old instant hidden-attribute snap. Duration matches the CSS
-  // transition on #item-view-modal (see app.css) — the setTimeout in
-  // closeItemView() just needs to outlast it before hiding for real.
-  var IV_TRANSITION_MS = 320;
-  var ivClosing = false;
+  // of the old instant hidden-attribute snap. Shared by every .sheet
+  // overlay (Item View, New Item) so they all animate identically —
+  // duration matches the CSS transition on .modal-overlay.sheet (see
+  // app.css); the setTimeout just needs to outlast it before hiding
+  // for real. The 'is-closing' class (rather than a module-level flag)
+  // tracks in-flight closes per-overlay, so two different sheets can
+  // close independently without stepping on each other's state.
+  var SHEET_TRANSITION_MS = 320;
+
+  function openSheet(sheetOverlay) {
+    sheetOverlay.classList.remove('is-closing');
+    sheetOverlay.hidden = false;
+    void sheetOverlay.offsetWidth; // force layout so is-open's transition starts from the closed state, not skips straight to open
+    sheetOverlay.classList.add('is-open');
+  }
+
+  function closeSheet(sheetOverlay) {
+    if (sheetOverlay.hidden || sheetOverlay.classList.contains('is-closing')) return;
+    sheetOverlay.classList.add('is-closing');
+    sheetOverlay.classList.remove('is-open');
+    setTimeout(function () {
+      sheetOverlay.hidden = true;
+      sheetOverlay.classList.remove('is-closing');
+    }, SHEET_TRANSITION_MS);
+  }
 
   function openItemView() {
-    ivClosing = false;
-    ivOverlay.hidden = false;
-    void ivOverlay.offsetWidth; // force layout so is-open's transition starts from the closed state, not skips straight to open
-    ivOverlay.classList.add('is-open');
+    openSheet(ivOverlay);
   }
 
   function closeItemView() {
-    if (ivOverlay.hidden || ivClosing) return;
-    ivClosing = true;
-    ivOverlay.classList.remove('is-open');
-    setTimeout(function () {
-      ivOverlay.hidden = true;
-      ivClosing = false;
-    }, IV_TRANSITION_MS);
+    closeSheet(ivOverlay);
   }
 
   ivCloseBtn.addEventListener('click', closeItemView);
@@ -650,12 +661,12 @@
     buildCategoryChips();
     buildUnitChips();
     showStageForm();
-    overlay.hidden = false;
+    openSheet(overlay);
     nameInput.focus();
   }
 
   function closeModal() {
-    overlay.hidden = true;
+    closeSheet(overlay);
   }
 
   function resetForm() {
@@ -838,6 +849,9 @@
   closeBtn.addEventListener('click', closeModal);
   cancelBtn.addEventListener('click', closeModal);
   doneBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) closeModal();
+  });
 
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;

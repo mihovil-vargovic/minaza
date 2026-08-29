@@ -55,7 +55,7 @@
       p.textContent = 'Could not load history.';
       var retry = document.createElement('button');
       retry.type = 'button';
-      retry.className = 'btn btn-secondary';
+      retry.className = 'btn btn-tertiary';
       retry.textContent = 'Retry';
       retry.addEventListener('click', loadHistory);
       stateEl.appendChild(retry);
@@ -118,7 +118,7 @@
 
     var restoreBtn = document.createElement('button');
     restoreBtn.type = 'button';
-    restoreBtn.className = 'btn btn-secondary';
+    restoreBtn.className = 'btn btn-tertiary';
     restoreBtn.textContent = 'Restore';
     restoreBtn.addEventListener('click', function () {
       restore(item, restoreBtn);
@@ -156,7 +156,7 @@
     actionTd.className = 'hist-row-action';
     var restoreBtn = document.createElement('button');
     restoreBtn.type = 'button';
-    restoreBtn.className = 'btn btn-secondary';
+    restoreBtn.className = 'btn btn-tertiary';
     restoreBtn.textContent = 'Restore';
     restoreBtn.addEventListener('click', function () {
       restore(item, restoreBtn);

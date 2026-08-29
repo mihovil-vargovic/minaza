@@ -63,6 +63,11 @@ button {
 }
 
 .btn-secondary {
+  background: var(--border);
+  color: var(--foreground);
+}
+
+.btn-tertiary {
   background: var(--background);
   color: var(--foreground);
   border-color: var(--border);
@@ -462,7 +467,7 @@ button {
     opacity: 0.9;
   }
 
-  .btn-secondary:hover,
+  .btn-tertiary:hover,
   .btn-icon:not(.active):hover,
   .chip-clear:hover,
   .chip:hover,
@@ -475,10 +480,16 @@ button {
     background: var(--muted);
   }
 
-  /* The sidebar itself sits on the muted page canvas, so var(--muted)
+  /* The sidebar sits on the muted page canvas, so var(--muted)
      would be invisible here — needs a visibly darker shade to register. */
   .nav-item:not(.active):hover {
     background: var(--border);
+  }
+
+  /* .btn-secondary's own resting fill is already var(--border), so its
+     hover needs to go one shade darker still (zinc-300) to register. */
+  .btn-secondary:hover {
+    background: #d4d4d8;
   }
 
   .btn-icon.active:hover {
@@ -1231,27 +1242,27 @@ button {
   border-radius: var(--radius-sm);
 }
 
-/* Mobile Inventory item view: a bottom sheet, not the full-screen modal
-   every other .modal-overlay/.modal uses (New Item stays as-is — this is
-   scoped to #item-view-modal specifically). Anchored to the bottom edge,
+/* Bottom sheets: any .modal-overlay carrying .sheet (currently Item
+   View and New Item) shares one set of UI rules and animation — only
+   the content inside .modal differs. Anchored to the bottom edge,
    rounded top corners only, sized to its content instead of the full
    viewport height. Animates like a native iOS sheet — slides up from
    translateY(100%) and the backdrop fades in together — instead of the
-   old instant hidden-attribute snap; see openItemView()/closeItemView()
-   in inventory.js, which toggle the .is-open class this relies on. */
+   old instant hidden-attribute snap; see openSheet()/closeSheet() in
+   inventory.js, which toggle the .is-open class this relies on. */
 @media (max-width: 1023px) {
-  #item-view-modal.modal-overlay {
+  .modal-overlay.sheet {
     align-items: flex-end;
     padding: 0;
     background: rgba(0, 0, 0, 0);
     transition: background-color 320ms ease;
   }
 
-  #item-view-modal.modal-overlay.is-open {
+  .modal-overlay.sheet.is-open {
     background: rgba(0, 0, 0, 0.4);
   }
 
-  #item-view-modal .modal {
+  .sheet .modal {
     max-width: none;
     height: auto;
     max-height: 85dvh;
@@ -1261,20 +1272,27 @@ button {
     transition: transform 320ms cubic-bezier(0.32, 0.72, 0, 1);
   }
 
-  #item-view-modal.modal-overlay.is-open .modal {
+  .modal-overlay.sheet.is-open .modal {
     transform: translateY(0);
   }
 
   /* Purely visual affordance signaling "this is a sheet" (no drag-to-
-     dismiss gesture behind it) — tap-outside and the close button both
+     dismiss gesture behind it) — tap-outside and the footer buttons
      already dismiss it. */
-  #item-view-modal .sheet-grabber {
+  .sheet .sheet-grabber {
     width: 36px;
     height: 4px;
     flex-shrink: 0;
     border-radius: var(--radius-full);
     background: var(--border);
     margin: var(--space-3) auto 0;
+  }
+
+  /* New Item keeps its top-right x for the desktop dialog, but a sheet
+     dismisses via tap-outside/grabber/footer Cancel like Item View —
+     no second close affordance needed. */
+  .sheet .modal-close {
+    display: none;
   }
 }
 
@@ -1371,6 +1389,20 @@ button {
   font-weight: 400;
   font-size: var(--text-small);
   overflow-wrap: anywhere;
+}
+
+/* Inside a sheet's .modal-body, dividers should bleed edge-to-edge
+   instead of stopping at the body's own inset padding — bleed the
+   table past it and push the padding back onto the cells instead. */
+.modal-body .detail-kv-table {
+  width: calc(100% + var(--space-5) * 2);
+  margin: 0 calc(var(--space-5) * -1);
+}
+
+.modal-body .detail-kv-table th,
+.modal-body .detail-kv-table td {
+  padding-left: var(--space-5);
+  padding-right: var(--space-5);
 }
 
 .detail-kv-table th {
