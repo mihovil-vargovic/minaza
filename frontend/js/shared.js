@@ -36,7 +36,7 @@
     'Toilet': '<rect x="3" y="6" width="14" height="12" rx="2"></rect><circle cx="10" cy="12" r="3"></circle><path d="M17 9c2 0 4 1.5 4 3.5S19 16 17 16"></path>',
     'Fruit': '<path d="M12 8c-4 0-7 3-7 7a6 6 0 0 0 11.5 2.3A6 6 0 0 0 19 15c0-4-3-7-7-7z"></path><path d="M12 8c0-2 1-3 1-3"></path><path d="M12 5c1-1 2-1 3 0"></path>'
   };
-  var FALLBACK_ICON = '<path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L3 13V3h10l7.59 7.59a2 2 0 0 1 0 2.82z"></path><circle cx="7.5" cy="7.5" r="1"></circle>';
+  var FALLBACK_ICON = '<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.73V8z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line>';
 
   function categoryIconSvg(name) {
     return '<svg ' + ICON_ATTRS + '>' + (CATEGORY_ICONS[name] || FALLBACK_ICON) + '</svg>';

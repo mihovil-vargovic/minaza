@@ -55,7 +55,7 @@
               <div class="search-field">
                 <input id="inv-search" class="input search-input" type="text" placeholder="Search items">
                 <button id="inv-category-btn" class="btn-icon search-filter-btn" type="button" aria-label="Filter by category" aria-haspopup="true" aria-expanded="false">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="7" y1="12" x2="17" y2="12"></line><line x1="10" y1="18" x2="14" y2="18"></line></svg>
                 </button>
                 <div id="inv-category-menu" class="category-menu" hidden></div>
               </div>
@@ -72,7 +72,12 @@
                   <th>Item</th>
                   <th>Category</th>
                   <th>Amount</th>
-                  <th class="inv-th-expiry">Expiry</th>
+                  <th class="inv-th-expiry">
+                    <button type="button" id="inv-sort-expiry" class="inv-th-sort" aria-label="Sort by expiry date">
+                      Expiry
+                      <svg class="inv-th-sort-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l4-4 4 4"></path><path d="M16 15l-4 4-4-4"></path></svg>
+                    </button>
+                  </th>
                 </tr>
               </thead>
               <tbody id="inv-table-body"></tbody>
@@ -107,10 +112,10 @@
             <table class="detail-kv-table">
               <tbody>
                 <tr><th>Name</th><td id="detail-kv-name"></td></tr>
-                <tr><th>Category</th><td id="detail-kv-category"></td></tr>
                 <tr><th>Amount</th><td id="detail-kv-amount"></td></tr>
                 <tr><th>Expiry</th><td id="detail-kv-expiry"></td></tr>
-                <tr><th>Note</th><td id="detail-kv-notes"></td></tr>
+                <tr><th>Category</th><td id="detail-kv-category"></td></tr>
+                <tr><th>Notes</th><td id="detail-kv-notes"></td></tr>
               </tbody>
             </table>
 

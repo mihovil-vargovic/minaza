@@ -4,6 +4,7 @@
   var itemsCache = [];
   var searchQuery = '';
   var activeCategory = '';
+  var expirySort = ''; // '' | 'asc' | 'desc' — Expiry column header cycles through these
   var selectedCategory = ''; // New Item form's category chip selection
   var selectedUnit = '';
   var createdItem = null;
@@ -19,6 +20,7 @@
   var categoryBtn = document.getElementById('inv-category-btn');
   var categoryMenu = document.getElementById('inv-category-menu');
   var categoryClear = document.getElementById('inv-category-clear');
+  var expirySortBtn = document.getElementById('inv-sort-expiry');
   var stateEl = document.getElementById('inv-list-state');
   // The Inventory list is a table on both desktop and mobile now.
   var tableCard = document.getElementById('inv-table-card');
@@ -257,6 +259,23 @@
       if (q && (item.name || '').toLowerCase().indexOf(q) === -1) return false;
       return true;
     });
+
+    if (expirySort) {
+      // expiryDate is the <input type="date"> value (YYYY-MM-DD), so a
+      // plain string comparison already sorts chronologically. Items
+      // with no expiry date always sort last, in either direction —
+      // "no expiry" isn't meaningfully soonest or latest.
+      filtered = filtered.slice().sort(function (a, b) {
+        var ad = a.expiryDate || '';
+        var bd = b.expiryDate || '';
+        if (!ad && !bd) return 0;
+        if (!ad) return 1;
+        if (!bd) return -1;
+        if (ad === bd) return 0;
+        var cmp = ad < bd ? -1 : 1;
+        return expirySort === 'asc' ? cmp : -cmp;
+      });
+    }
 
     if (filtered.length === 0) {
       setState(itemsCache.length === 0 ? 'empty' : 'empty-filtered');
@@ -662,6 +681,25 @@
 
   categoryClear.addEventListener('click', function () {
     selectCategory('');
+  });
+
+  var EXPIRY_SORT_ICONS = {
+    '': '<path d="M8 9l4-4 4 4"></path><path d="M16 15l-4 4-4-4"></path>',
+    asc: '<polyline points="18 15 12 9 6 15"></polyline>',
+    desc: '<polyline points="6 9 12 15 18 9"></polyline>'
+  };
+
+  function updateExpirySortUI() {
+    expirySortBtn.classList.toggle('sort-asc', expirySort === 'asc');
+    expirySortBtn.classList.toggle('sort-desc', expirySort === 'desc');
+    var icon = expirySortBtn.querySelector('.inv-th-sort-icon');
+    icon.innerHTML = EXPIRY_SORT_ICONS[expirySort];
+  }
+
+  expirySortBtn.addEventListener('click', function () {
+    expirySort = expirySort === '' ? 'asc' : (expirySort === 'asc' ? 'desc' : '');
+    updateExpirySortUI();
+    renderList();
   });
 
   // ---- New Item modal ----

@@ -556,7 +556,7 @@ button {
   border-radius: var(--radius);
   background: var(--background);
   box-shadow: var(--shadow-sm);
-  padding: var(--space-5);
+  padding: var(--space-4);
   position: sticky;
   top: 0;
 }
@@ -584,6 +584,32 @@ button {
   font-weight: 500;
   color: var(--muted-foreground);
   border-bottom: 1px solid var(--border);
+}
+
+/* Expiry's header is a real <button> (sortable) — reset it back to
+   looking like the plain-text headers around it, just clickable. */
+.inv-th-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.inv-th-sort-icon {
+  flex-shrink: 0;
+}
+
+/* Active sort direction reads as the accent color instead of the
+   header's usual muted gray, so it's clear which column (and which
+   direction) the table is currently sorted by. */
+.inv-th-sort.sort-asc,
+.inv-th-sort.sort-desc {
+  color: var(--foreground);
 }
 
 .inv-row {
@@ -1462,20 +1488,29 @@ button {
 /* Inside a padded card — a sheet's .modal-body or the desktop
    .inventory-detail-panel — dividers should bleed edge-to-edge instead
    of stopping at the card's own inset padding. Bleed the table past it
-   and push the padding back onto the cells instead. Both containers
-   pad with var(--space-5), so one rule covers both. */
-.modal-body .detail-kv-table,
-.inventory-detail-panel .detail-kv-table {
+   and push the padding back onto the cells instead. The two containers
+   pad by different amounts (--space-5 vs --space-4), so each needs its
+   own bleed matched to its own padding. */
+.modal-body .detail-kv-table {
   width: calc(100% + var(--space-5) * 2);
   margin: 0 calc(var(--space-5) * -1);
 }
 
 .modal-body .detail-kv-table th,
-.modal-body .detail-kv-table td,
-.inventory-detail-panel .detail-kv-table th,
-.inventory-detail-panel .detail-kv-table td {
+.modal-body .detail-kv-table td {
   padding-left: var(--space-5);
   padding-right: var(--space-5);
+}
+
+.inventory-detail-panel .detail-kv-table {
+  width: calc(100% + var(--space-4) * 2);
+  margin: 0 calc(var(--space-4) * -1);
+}
+
+.inventory-detail-panel .detail-kv-table th,
+.inventory-detail-panel .detail-kv-table td {
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
 }
 
 .detail-kv-table th {
