@@ -620,6 +620,22 @@ button {
   padding: var(--space-3) var(--space-4);
 }
 
+/* Name/amount cells hold real text (line-height var(--text-p-lh)) once
+   loaded, but their skeleton bars are shorter than that on purpose (a
+   thin placeholder, not a full-height block) — so the *cell* still
+   needs to reserve the real line-height, or the skeleton row renders
+   shorter than the row that replaces it and the whole table jumps.
+   vertical-align: middle (the table-cell default) centers the shorter
+   bar within that reserved height. */
+.skeleton-cell-line {
+  /* content-box, not the global border-box default — height here means
+     "one line of body text," same as line-height does for the real
+     text this stands in for; border-box would fold the cell's own
+     padding into that height and undersize the content area. */
+  box-sizing: content-box;
+  height: var(--text-p-lh);
+}
+
 /* Sized/shaped after the real cells they stand in for (see buildRow in
    inventory.js) — name is a bold text-p line, category is the
    chip-category-sm pill (not text), amount/expiry are short values. */
@@ -694,6 +710,36 @@ button {
   .inv-table th,
   .inv-row td {
     padding: var(--space-2) var(--space-3);
+  }
+
+  /* Default table-layout:auto sizes columns from whichever content is
+     currently in the table — the skeleton's short placeholder bars and
+     real item names/amounts are very different widths, so columns (and
+     their headers) visibly shift once real data replaces the skeleton.
+     Fixed widths make both states share the exact same column
+     geometry. Scoped to #inv-table-card specifically — History reuses
+     .inv-table but its own table is hidden on mobile in favor of
+     .hist-cards, so this never applies there. */
+  #inv-table-card .inv-table {
+    table-layout: fixed;
+  }
+
+  #inv-table-card .inv-table th:nth-child(1),
+  #inv-table-card .inv-row td:nth-child(1) {
+    width: 53%;
+  }
+
+  /* Wide enough to fit the "Category" header itself — the real cells
+     below it only ever hold a 24px icon on mobile, but the header text
+     doesn't shrink to match. */
+  #inv-table-card .inv-table th:nth-child(2),
+  #inv-table-card .inv-row td:nth-child(2) {
+    width: 25%;
+  }
+
+  #inv-table-card .inv-table th:nth-child(3),
+  #inv-table-card .inv-row td:nth-child(3) {
+    width: 22%;
   }
 
   /* Expiry doesn't fit mobile's tighter width — scoped to Inventory's

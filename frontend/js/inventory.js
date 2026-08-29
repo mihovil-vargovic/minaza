@@ -169,6 +169,7 @@
       tr.className = 'inv-row skeleton-row';
 
       var nameTd = document.createElement('td');
+      nameTd.className = 'skeleton-cell-line';
       var nameLine = document.createElement('div');
       nameLine.className = 'skeleton-line skeleton-line-inv-name';
       nameTd.appendChild(nameLine);
@@ -182,6 +183,7 @@
       tr.appendChild(catTd);
 
       var amtTd = document.createElement('td');
+      amtTd.className = 'skeleton-cell-line';
       var amtLine = document.createElement('div');
       amtLine.className = 'skeleton-line skeleton-line-inv-amount';
       amtTd.appendChild(amtLine);
