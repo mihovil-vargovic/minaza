@@ -213,8 +213,15 @@
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'category-menu-item';
-    btn.textContent = label;
     btn.dataset.value = value;
+    // "All categories" isn't a real category — no icon for it, same
+    // trusted-icon/untrusted-label split as buildCategoryChips.
+    if (value) {
+      btn.innerHTML = storageBase.categoryIconSvg(value);
+    }
+    var labelEl = document.createElement('span');
+    labelEl.textContent = label;
+    btn.appendChild(labelEl);
     btn.classList.toggle('active', value === activeCategory);
     btn.addEventListener('click', function () {
       selectCategory(value);

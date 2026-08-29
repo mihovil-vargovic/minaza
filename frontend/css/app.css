@@ -510,7 +510,13 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
+  /* nowrap, not wrap: .inv-controls is the only wrap-prone item here,
+     and if it ever wrapped onto its own line, justify-content:
+     space-between would left-align that single-item line instead of
+     keeping it flush against the row's right edge (and therefore out
+     of alignment with the table below) — .search-field already
+     shrinks (flex: 0 1 240px) to make room instead. */
+  flex-wrap: nowrap;
   gap: var(--space-4);
   margin-bottom: var(--space-5);
 }
@@ -530,10 +536,7 @@ button {
 .inventory-layout {
   display: flex;
   align-items: flex-start;
-  /* Wider than the usual --space-5 gap used elsewhere — the list and
-     detail panel need to read as two clearly separate cards, not two
-     panels sitting close together. */
-  gap: var(--space-7);
+  gap: 0;
 }
 
 /* Explicit calc()'d flex-basis (not just flex:2/flex:1's grow-ratio,
@@ -865,6 +868,9 @@ button {
 }
 
 .category-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   text-align: left;
   background: none;
   border: none;
@@ -872,6 +878,22 @@ button {
   border-radius: var(--radius-sm);
   color: var(--foreground);
   font-size: var(--text-small);
+}
+
+/* Only the category-filter items carry an icon (the detail "⋮" menu's
+   Reprint/Download/Delete items share this class but have none) —
+   shrink-proof so a long category name wrapping doesn't squash it.
+   Sized up from the shared 12px categoryIconSvg() default (used
+   as-is everywhere else — table badges, New Item chips) since this
+   menu is the one place the icon stands alone next to plain text
+   rather than inside a small pill/chip. */
+.category-menu-item svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  /* Gray, not the item's own text color — the icon is a secondary cue,
+     the label carries the emphasis (bold + background on .active). */
+  color: var(--muted-foreground);
 }
 
 .category-menu-item.active {
@@ -1246,8 +1268,8 @@ button {
 }
 
 .chip-category-sm svg {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
 }
 
 /* New Item modal */
@@ -1437,16 +1459,21 @@ button {
   overflow-wrap: anywhere;
 }
 
-/* Inside a sheet's .modal-body, dividers should bleed edge-to-edge
-   instead of stopping at the body's own inset padding — bleed the
-   table past it and push the padding back onto the cells instead. */
-.modal-body .detail-kv-table {
+/* Inside a padded card — a sheet's .modal-body or the desktop
+   .inventory-detail-panel — dividers should bleed edge-to-edge instead
+   of stopping at the card's own inset padding. Bleed the table past it
+   and push the padding back onto the cells instead. Both containers
+   pad with var(--space-5), so one rule covers both. */
+.modal-body .detail-kv-table,
+.inventory-detail-panel .detail-kv-table {
   width: calc(100% + var(--space-5) * 2);
   margin: 0 calc(var(--space-5) * -1);
 }
 
 .modal-body .detail-kv-table th,
-.modal-body .detail-kv-table td {
+.modal-body .detail-kv-table td,
+.inventory-detail-panel .detail-kv-table th,
+.inventory-detail-panel .detail-kv-table td {
   padding-left: var(--space-5);
   padding-right: var(--space-5);
 }
