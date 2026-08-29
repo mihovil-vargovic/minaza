@@ -521,8 +521,8 @@ button {
   /* nowrap, not wrap: .inv-controls is the only wrap-prone item here,
      and if it ever wrapped onto its own line, it would left-align on
      that line instead of staying flush against the row's right edge
-     (and therefore out of alignment with the table below) —
-     .search-field already shrinks (flex: 0 1 240px) to make room
+     (and therefore out of alignment with the table below) — its fixed-
+     width .search-trigger already keeps the row narrow enough to fit
      instead. */
   flex-wrap: nowrap;
   gap: var(--space-4);
@@ -532,10 +532,14 @@ button {
 /* Pinned to the row's right edge directly, rather than via
    justify-content: space-between on the row — a more direct anchor
    that can't be thrown off by how the other header items (title,
-   History icon) end up sized/spaced. */
+   History icon) end up sized/spaced. A prior -10px nudge here pushed
+   the row past .inventory-list-pane's own right edge — harmless while
+   there was still a gap before the detail panel, but the list/detail
+   gap was dropped since, so that overshoot let the New Item button's
+   trailing edge render underneath the (opaque) detail panel. Flush
+   right against the pane instead, no overshoot. */
 .page-header .inv-controls {
   margin-left: auto;
-  margin-right: -10px;
 }
 
 .page-header h2 {
@@ -553,7 +557,7 @@ button {
 .inventory-layout {
   display: flex;
   align-items: flex-start;
-  gap: 0;
+  gap: var(--space-6);
 }
 
 /* Explicit calc()'d flex-basis (not just flex:2/flex:1's grow-ratio,
@@ -562,12 +566,12 @@ button {
    width, flex-grow/shrink both off so neither side's content can pull
    it wider or narrower than that. */
 .inventory-list-pane {
-  flex: 0 0 calc((100% - var(--space-7)) * 2 / 3);
+  flex: 0 0 calc((100% - var(--space-6)) * 2 / 3);
   min-width: 0;
 }
 
 .inventory-detail-panel {
-  flex: 0 0 calc((100% - var(--space-7)) * 1 / 3);
+  flex: 0 0 calc((100% - var(--space-6)) * 1 / 3);
   min-width: 0;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -825,13 +829,53 @@ button {
   gap: var(--space-3);
 }
 
-.search-field {
-  position: relative;
-  flex: 0 1 240px;
+/* Desktop's persistent inline search field was replaced by the
+   .search-trigger button (opens #search-palette, a cmdk-style modal) —
+   .search-input itself is still used by mobile's Search-tab takeover
+   field (search.js), just no longer here. */
+.search-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 40px;
+  width: 200px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
 }
 
-.search-input {
-  padding-right: 44px;
+.search-trigger:hover {
+  border-color: var(--ring);
+}
+
+.search-trigger-icon {
+  flex-shrink: 0;
+}
+
+.search-trigger-label {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-trigger-kbd {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1;
+  color: var(--muted-foreground);
+  background: var(--muted);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+}
+
+.category-filter-wrap {
+  position: relative;
 }
 
 @media (max-width: 1023px) {
@@ -847,9 +891,12 @@ button {
 
   /* Search (text query + category filter) is its own tab on mobile now
      (see planning5) — the Inventory header keeps only the History icon;
-     the search field and the category-filter button both move to the
-     Search screen instead of staying here. */
-  .search-field,
+     the search trigger and the category-filter button both move to the
+     Search screen instead of staying here. Redundant with .inv-controls'
+     own display: none above (nothing here is reachable anyway) but kept
+     explicit in case that parent rule ever changes. */
+  .search-trigger,
+  .category-filter-wrap,
   #inv-category-clear {
     display: none;
   }
@@ -868,20 +915,6 @@ button {
   [data-view-panel="inventory"] .page-header h2 {
     align-self: center;
   }
-}
-
-/* Filter icon merged into the search field's trailing edge — subtle by
-   default so it reads as part of the field, filled via the existing
-   .btn-icon.active rule when a category filter is engaged. */
-.search-filter-btn {
-  position: absolute;
-  top: 50%;
-  right: 4px;
-  transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: none;
 }
 
 /* Active state — filled like .btn-primary, so an engaged filter reads
@@ -1346,6 +1379,108 @@ button {
   line-height: 1;
   color: var(--muted-foreground);
   border-radius: var(--radius-sm);
+}
+
+/* Desktop search palette (#search-palette, inventory.js) — cmdk-style
+   jump-to-item, opened via .search-trigger or Cmd/Ctrl+K. Sits higher
+   than a centered modal (align-items: flex-start + top padding) to read
+   as a command palette rather than a dialog. */
+.palette-overlay {
+  align-items: flex-start;
+  padding-top: 12vh;
+}
+
+.palette-modal {
+  max-width: 560px;
+  max-height: 60vh;
+  overflow: hidden;
+}
+
+.palette-search-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.palette-search-icon {
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+}
+
+.palette-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--text-p);
+  color: var(--foreground);
+}
+
+.palette-input::placeholder {
+  color: var(--muted-foreground);
+}
+
+.palette-results {
+  overflow-y: auto;
+  padding: var(--space-2);
+}
+
+.palette-group-label {
+  padding: var(--space-2) var(--space-3);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--muted-foreground);
+}
+
+.palette-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  border: none;
+  background: none;
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--foreground);
+  font-size: var(--text-small);
+}
+
+.palette-item .category-icon {
+  flex-shrink: 0;
+  font-size: 16px;
+  color: var(--muted-foreground);
+}
+
+.palette-item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.palette-item-meta {
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+
+.palette-item.active {
+  background: var(--muted);
+}
+
+.palette-empty {
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
 }
 
 /* Bottom sheets: any .modal-overlay carrying .sheet (currently Item

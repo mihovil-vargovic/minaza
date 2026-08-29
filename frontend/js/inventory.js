@@ -2,7 +2,6 @@
   var storageBase = window.storageBase;
 
   var itemsCache = [];
-  var searchQuery = '';
   var activeCategory = '';
   var expirySort = ''; // '' | 'asc' | 'desc' — Expiry column header cycles through these
   var selectedCategory = ''; // New Item form's category chip selection
@@ -16,7 +15,10 @@
 
   // ---- DOM refs ----
   var newBtn = document.getElementById('inv-new-btn');
-  var searchInput = document.getElementById('inv-search');
+  var searchBtn = document.getElementById('inv-search-btn');
+  var palette = document.getElementById('search-palette');
+  var paletteInput = document.getElementById('palette-input');
+  var paletteResults = document.getElementById('palette-results');
   var categoryBtn = document.getElementById('inv-category-btn');
   var categoryMenu = document.getElementById('inv-category-menu');
   var categoryClear = document.getElementById('inv-category-clear');
@@ -152,7 +154,7 @@
     } else if (kind === 'empty') {
       p.textContent = 'No items yet. Add your first item to get started.';
     } else if (kind === 'empty-filtered') {
-      p.textContent = 'No items match your search.';
+      p.textContent = 'No items match this filter.';
     }
   }
 
@@ -253,10 +255,8 @@
   }
 
   function renderList() {
-    var q = searchQuery.trim().toLowerCase();
     var filtered = itemsCache.filter(function (item) {
       if (activeCategory && (item.category || '') !== activeCategory) return false;
-      if (q && (item.name || '').toLowerCase().indexOf(q) === -1) return false;
       return true;
     });
 
@@ -659,9 +659,126 @@
   // same as Reprint/Download.
   detailDeleteBtn.addEventListener('click', closeDetailMenu);
 
-  searchInput.addEventListener('input', function () {
-    searchQuery = searchInput.value;
-    renderList();
+  // ---- Desktop search palette (cmdk-style jump-to-item) ----
+  // Replaces the old persistent inline search field: this modal doesn't
+  // filter the table itself (activeCategory/expirySort still do that),
+  // it's purely a fast way to find an item by name and select it
+  // straight into the detail panel. Desktop-only, same as searchBtn's
+  // container (see .inv-controls' <1024px display: none).
+  var paletteMatches = [];
+  var paletteActiveIndex = -1;
+
+  function openPalette() {
+    palette.hidden = false;
+    paletteInput.value = '';
+    renderPaletteResults('');
+    paletteInput.focus();
+  }
+
+  function closePalette() {
+    palette.hidden = true;
+  }
+
+  function renderPaletteResults(query) {
+    var q = query.trim().toLowerCase();
+    paletteMatches = itemsCache.filter(function (item) {
+      return !q || (item.name || '').toLowerCase().indexOf(q) !== -1;
+    }).slice(0, 8);
+    paletteActiveIndex = paletteMatches.length ? 0 : -1;
+
+    paletteResults.innerHTML = '';
+
+    if (paletteMatches.length === 0) {
+      var empty = document.createElement('div');
+      empty.className = 'palette-empty';
+      empty.textContent = itemsCache.length === 0 ? 'No items yet.' : 'No items match your search.';
+      paletteResults.appendChild(empty);
+      return;
+    }
+
+    var label = document.createElement('div');
+    label.className = 'palette-group-label';
+    label.textContent = 'Items';
+    paletteResults.appendChild(label);
+
+    paletteMatches.forEach(function (item, i) {
+      var row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'palette-item';
+      row.classList.toggle('active', i === paletteActiveIndex);
+      // Icon is a trusted fixed glyph (see categoryIconHtml) — the name
+      // itself is untrusted data, so it goes in via a separate
+      // textContent-set span, same split shared.js already uses.
+      row.innerHTML = storageBase.categoryIconHtml(item.category || '');
+      var name = document.createElement('span');
+      name.className = 'palette-item-name';
+      name.textContent = item.name || '';
+      row.appendChild(name);
+      var meta = document.createElement('span');
+      meta.className = 'palette-item-meta';
+      meta.textContent = item.amount + ' ' + item.unit;
+      row.appendChild(meta);
+      row.addEventListener('mouseenter', function () {
+        paletteActiveIndex = i;
+        updatePaletteActive();
+      });
+      row.addEventListener('click', function () {
+        choosePaletteItem(item);
+      });
+      paletteResults.appendChild(row);
+    });
+  }
+
+  function updatePaletteActive() {
+    Array.prototype.forEach.call(paletteResults.querySelectorAll('.palette-item'), function (row, i) {
+      var isActive = i === paletteActiveIndex;
+      row.classList.toggle('active', isActive);
+      if (isActive) row.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  function choosePaletteItem(item) {
+    closePalette();
+    selectDesktopItem(item);
+  }
+
+  searchBtn.addEventListener('click', openPalette);
+
+  palette.addEventListener('click', function (e) {
+    if (e.target === palette) closePalette();
+  });
+
+  paletteInput.addEventListener('input', function () {
+    renderPaletteResults(paletteInput.value);
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k' && isDesktop()) {
+      e.preventDefault();
+      if (palette.hidden) openPalette(); else closePalette();
+      return;
+    }
+    if (palette.hidden) return;
+
+    if (e.key === 'Escape') {
+      closePalette();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (paletteMatches.length) {
+        paletteActiveIndex = (paletteActiveIndex + 1) % paletteMatches.length;
+        updatePaletteActive();
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (paletteMatches.length) {
+        paletteActiveIndex = (paletteActiveIndex - 1 + paletteMatches.length) % paletteMatches.length;
+        updatePaletteActive();
+      }
+    } else if (e.key === 'Enter') {
+      if (paletteActiveIndex >= 0 && paletteMatches[paletteActiveIndex]) {
+        choosePaletteItem(paletteMatches[paletteActiveIndex]);
+      }
+    }
   });
 
   categoryBtn.addEventListener('click', function () {

@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Storage Base</title>
-<link rel="manifest" href="manifest.webmanifest?v=57">
+<link rel="manifest" href="manifest.webmanifest?v=58">
 <meta name="theme-color" content="#fafafa">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Storage Base">
-<link rel="stylesheet" href="css/tokens.css?v=57">
-<link rel="stylesheet" href="css/app.css?v=57">
+<link rel="stylesheet" href="css/tokens.css?v=58">
+<link rel="stylesheet" href="css/app.css?v=58">
 <!-- Duotone category icons (Jams/Vegetables/Oil & Acid/Tomato/Toilet/
      Fruit + the generic fallback) — see categoryIconHtml() in shared.js.
      Needs network on first load; nothing else in the app depends on it. -->
@@ -56,9 +56,13 @@
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             </button>
             <div class="inv-controls">
-              <div class="search-field">
-                <input id="inv-search" class="input search-input" type="text" placeholder="Search items">
-                <button id="inv-category-btn" class="btn-icon search-filter-btn" type="button" aria-label="Filter by category" aria-haspopup="true" aria-expanded="false">
+              <button id="inv-search-btn" class="search-trigger" type="button" aria-label="Search items" aria-haspopup="dialog">
+                <svg class="search-trigger-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <span class="search-trigger-label">Search items</span>
+                <span class="search-trigger-kbd">&#8984;K</span>
+              </button>
+              <div class="category-filter-wrap">
+                <button id="inv-category-btn" class="btn-icon" type="button" aria-label="Filter by category" aria-haspopup="true" aria-expanded="false">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="7" y1="12" x2="17" y2="12"></line><line x1="10" y1="18" x2="14" y2="18"></line></svg>
                 </button>
                 <div id="inv-category-menu" class="category-menu" hidden></div>
@@ -368,6 +372,16 @@
   </div>
 </div>
 
+<div id="search-palette" class="modal-overlay palette-overlay" hidden>
+  <div class="modal palette-modal">
+    <div class="palette-search-row">
+      <svg class="palette-search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input id="palette-input" class="palette-input" type="text" placeholder="Search items..." autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div id="palette-results" class="palette-results"></div>
+  </div>
+</div>
+
 <div id="print-label"></div>
 
 <div id="toast-container" class="toast-container"></div>
@@ -375,13 +389,13 @@
 <script src="config.local.js"></script>
 <script src="js/vendor/qrcode.min.js"></script>
 <script src="js/vendor/jsQR.min.js"></script>
-<script src="js/shared.js?v=57"></script>
-<script src="js/app.js?v=57"></script>
-<script src="js/toast.js?v=57"></script>
-<script src="js/inventory.js?v=57"></script>
-<script src="js/history.js?v=57"></script>
-<script src="js/search.js?v=57"></script>
-<script src="js/scan.js?v=57"></script>
+<script src="js/shared.js?v=58"></script>
+<script src="js/app.js?v=58"></script>
+<script src="js/toast.js?v=58"></script>
+<script src="js/inventory.js?v=58"></script>
+<script src="js/history.js?v=58"></script>
+<script src="js/search.js?v=58"></script>
+<script src="js/scan.js?v=58"></script>
 <script>window.storageBase.init();</script>
 </body>
 </html>
