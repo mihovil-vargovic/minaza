@@ -85,6 +85,15 @@ button {
   color: var(--foreground);
 }
 
+/* Same size/touch target as .btn-icon, but no visible chrome — just
+   the icon. For places .btn-icon's own bordered/filled box would read
+   as a heavier, more "button-like" affordance than intended (e.g. a
+   nav-bar back arrow, which should look like plain iconography). */
+.btn-icon-ghost {
+  border-color: transparent;
+  background: none;
+}
+
 .input {
   width: 100%;
   height: 40px;
@@ -509,16 +518,23 @@ button {
 .page-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   /* nowrap, not wrap: .inv-controls is the only wrap-prone item here,
-     and if it ever wrapped onto its own line, justify-content:
-     space-between would left-align that single-item line instead of
-     keeping it flush against the row's right edge (and therefore out
-     of alignment with the table below) — .search-field already
-     shrinks (flex: 0 1 240px) to make room instead. */
+     and if it ever wrapped onto its own line, it would left-align on
+     that line instead of staying flush against the row's right edge
+     (and therefore out of alignment with the table below) —
+     .search-field already shrinks (flex: 0 1 240px) to make room
+     instead. */
   flex-wrap: nowrap;
   gap: var(--space-4);
   margin-bottom: var(--space-5);
+}
+
+/* Pinned to the row's right edge directly, rather than via
+   justify-content: space-between on the row — a more direct anchor
+   that can't be thrown off by how the other header items (title,
+   History icon) end up sized/spaced. */
+.page-header .inv-controls {
+  margin-left: auto;
 }
 
 .page-header h2 {
@@ -989,40 +1005,29 @@ button {
   }
 }
 
-/* Mobile History: card list instead of the table (shared with desktop
-   via .inv-table-card/.inv-table above) — a 5-column table doesn't fit a
-   phone width without cramming or scrolling every row. Each item's
-   Name/Category/Amount/Removed render as label:value rows reusing
-   .detail-kv-table (same pattern as the desktop Inventory detail panel),
-   with Restore as its own full-width row at the bottom. */
-.hist-cards {
-  display: none;
-}
-
-.hist-card {
-  background: var(--background);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: var(--space-4);
-  margin-bottom: var(--space-3);
-}
-
-.hist-card:last-child {
-  margin-bottom: 0;
-}
-
-.hist-card .btn {
-  width: 100%;
-  margin-top: var(--space-3);
-}
-
+/* Mobile History: same table as desktop (shared via .inv-table-card/
+   .inv-table), just Name + Removed — Category/Amount/the Restore-button
+   column are hidden rather than dropped from the markup, same pattern
+   Inventory's own mobile table already uses for Expiry. Tapping a row
+   opens #hist-item-modal (a .sheet, styled/animated identically to
+   Inventory's #item-view-modal) with the full details and Restore. */
 @media (max-width: 1023px) {
-  [data-view-panel="history"] .inv-table-card {
+  #hist-table-card .inv-table th:nth-child(2),
+  #hist-table-card .inv-table th:nth-child(3),
+  #hist-table-card .inv-table th:nth-child(5),
+  #hist-list .hist-row > *:nth-child(2),
+  #hist-list .hist-row > *:nth-child(3),
+  #hist-list .hist-row > *:nth-child(5) {
     display: none;
   }
 
-  [data-view-panel="history"] .hist-cards {
-    display: block;
+  #hist-table-card .inv-table th:nth-child(1),
+  #hist-list .hist-row td:nth-child(1) {
+    width: 60%;
+  }
+
+  .hist-row {
+    cursor: pointer;
   }
 }
 
@@ -1057,11 +1062,13 @@ button {
 }
 
 /* History — reuses Inventory's .inv-table/.inv-row styling; only the
-   trailing Restore-button cell is History-specific. Unlike Inventory
-   rows, a History row itself isn't clickable (only its Restore button
-   is), so it shouldn't borrow .inv-row's pointer cursor/hover tint. */
-.hist-row {
-  cursor: default;
+   trailing Restore-button cell is History-specific. Desktop keeps rows
+   non-clickable (only the Restore button is) — mobile rows ARE
+   clickable (opens #hist-item-modal), overridden above. */
+@media (min-width: 1024px) {
+  .hist-row {
+    cursor: default;
+  }
 }
 
 .hist-row-action {
@@ -1457,6 +1464,13 @@ button {
 .label-id {
   font-family: var(--font-mono);
   font-size: var(--text-p);
+}
+
+/* Mobile Inventory item-view bottom sheet only — the code reads as an
+   important, glanceable identifier there (no surrounding detail-panel
+   chrome giving it context like on desktop), so it gets the bump. */
+#iv-id.label-id {
+  font-size: var(--text-h3);
 }
 
 /* Desktop detail panel — key-value table (Name/Category/Amount/Expiry/

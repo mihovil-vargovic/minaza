@@ -3,7 +3,60 @@
 
   var stateEl = document.getElementById('hist-list-state');
   var listEl = document.getElementById('hist-list');
-  var cardsEl = document.getElementById('hist-cards');
+
+  function isDesktop() {
+    return window.matchMedia('(min-width: 1024px)').matches;
+  }
+
+  // ---- Mobile detail sheet — same .sheet animation/rules as Inventory's
+  // #item-view-modal (see app.css), separate instance since it shows
+  // Removed instead of Expiry and Restore instead of just Close. ----
+  var histModal = document.getElementById('hist-item-modal');
+  var histRestoreBtn = document.getElementById('hist-item-restore');
+  var histKv = {
+    name: document.getElementById('hist-kv-name'),
+    category: document.getElementById('hist-kv-category'),
+    amount: document.getElementById('hist-kv-amount'),
+    removed: document.getElementById('hist-kv-removed'),
+    notes: document.getElementById('hist-kv-notes')
+  };
+  var histModalItem = null;
+  var histModalClosing = false;
+
+  function openHistItemModal(item) {
+    histModalItem = item;
+    histKv.name.textContent = item.name || '—';
+    histKv.category.textContent = item.category || '—';
+    histKv.amount.textContent = item.amount ? item.amount + ' ' + item.unit : '—';
+    histKv.removed.textContent = formatRemovedDate(item.removedAt) || '—';
+    histKv.notes.textContent = item.notes || '—';
+    histRestoreBtn.disabled = false;
+    histRestoreBtn.textContent = 'Restore';
+
+    histModalClosing = false;
+    histModal.hidden = false;
+    void histModal.offsetWidth;
+    histModal.classList.add('is-open');
+  }
+
+  function closeHistItemModal() {
+    if (histModal.hidden || histModalClosing) return;
+    histModalClosing = true;
+    histModal.classList.remove('is-open');
+    setTimeout(function () {
+      histModal.hidden = true;
+      histModalClosing = false;
+    }, 320);
+  }
+
+  histModal.addEventListener('click', function (e) {
+    if (e.target === histModal) closeHistItemModal();
+  });
+
+  histRestoreBtn.addEventListener('click', function () {
+    if (!histModalItem) return;
+    restore(histModalItem, histRestoreBtn, closeHistItemModal);
+  });
 
   // Stale-while-revalidate, same as inventory.js's loadItems() — only
   // the first load shows the loading state; every re-entry after that
@@ -37,13 +90,11 @@
       stateEl.hidden = true;
       listEl.hidden = false;
       listEl.innerHTML = '';
-      cardsEl.innerHTML = '';
       return;
     }
 
     listEl.hidden = true;
     listEl.innerHTML = ''; // don't leave stale rows behind a hidden container — see loadHistory()'s stale-while-revalidate note
-    cardsEl.innerHTML = '';
     stateEl.hidden = false;
     stateEl.innerHTML = '';
 
@@ -78,54 +129,9 @@
     setState(null);
 
     listEl.innerHTML = '';
-    cardsEl.innerHTML = '';
     items.forEach(function (item) {
       listEl.appendChild(buildRow(item));
-      cardsEl.appendChild(buildCard(item));
     });
-  }
-
-  // Mobile-only card, reusing the same .detail-kv-table label:value
-  // pattern the desktop Inventory detail panel already uses, since a
-  // 5-column table doesn't fit a phone width.
-  function buildCard(item) {
-    var card = document.createElement('div');
-    card.className = 'hist-card';
-
-    var table = document.createElement('table');
-    table.className = 'detail-kv-table';
-
-    function row(label, valueText, valueNode) {
-      var tr = document.createElement('tr');
-      var th = document.createElement('th');
-      th.textContent = label;
-      var td = document.createElement('td');
-      if (valueNode) {
-        td.appendChild(valueNode);
-      } else {
-        td.textContent = valueText || '—';
-      }
-      tr.appendChild(th);
-      tr.appendChild(td);
-      table.appendChild(tr);
-    }
-
-    row('Name', item.name);
-    row('Category', null, item.category ? storageBase.buildCategoryBadge(item.category) : null);
-    row('Amount', item.amount + ' ' + item.unit);
-    row('Removed', formatRemovedDate(item.removedAt));
-    card.appendChild(table);
-
-    var restoreBtn = document.createElement('button');
-    restoreBtn.type = 'button';
-    restoreBtn.className = 'btn btn-tertiary';
-    restoreBtn.textContent = 'Restore';
-    restoreBtn.addEventListener('click', function () {
-      restore(item, restoreBtn);
-    });
-    card.appendChild(restoreBtn);
-
-    return card;
   }
 
   function buildRow(item) {
@@ -164,13 +170,21 @@
     actionTd.appendChild(restoreBtn);
     tr.appendChild(actionTd);
 
+    // Mobile only — desktop keeps rows non-clickable (Restore is the
+    // only interactive part of a row there, per .hist-row's cursor
+    // rule above).
+    tr.addEventListener('click', function () {
+      if (!isDesktop()) openHistItemModal(item);
+    });
+
     return tr;
   }
 
   // Undoes an accidental Remove — clears removedAt server-side, puts the
   // item back in active Inventory. No confirmation step: unlike Delete
-  // this is fully reversible (Remove it again).
-  function restore(item, btn) {
+  // this is fully reversible (Remove it again). onRestored, if given,
+  // fires only on success (e.g. to close the mobile detail sheet).
+  function restore(item, btn, onRestored) {
     btn.disabled = true;
     btn.textContent = 'Restoring…';
     storageBase.call('restore', { id: item.id }).then(function (res) {
@@ -185,6 +199,7 @@
           { type: 'error' }
         );
         if (res.error === 'not_found') {
+          if (onRestored) onRestored();
           loadHistory();
           return;
         }
@@ -193,6 +208,7 @@
         return;
       }
       storageBase.toast((item.name || 'Item') + ' restored.');
+      if (onRestored) onRestored();
       loadHistory();
     }).catch(function (err) {
       storageBase.toast(err.message || 'Could not reach the backend.', { type: 'error' });
