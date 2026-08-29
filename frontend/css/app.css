@@ -925,14 +925,13 @@ button {
 /* Only the category-filter items carry an icon (the detail "⋮" menu's
    Reprint/Download/Delete items share this class but have none) —
    shrink-proof so a long category name wrapping doesn't squash it.
-   Sized up from the shared 12px categoryIconSvg() default (used
-   as-is everywhere else — table badges, New Item chips) since this
-   menu is the one place the icon stands alone next to plain text
-   rather than inside a small pill/chip. */
-.category-menu-item svg {
+   Sized up from the shared 12px .category-icon default (used as-is
+   everywhere else — table badges, New Item chips) since this menu is
+   the one place the icon stands alone next to plain text rather than
+   inside a small pill/chip. */
+.category-menu-item .category-icon {
   flex-shrink: 0;
-  width: 16px;
-  height: 16px;
+  font-size: 16px;
   /* Gray, not the item's own text color — the icon is a secondary cue,
      the label carries the emphasis (bold + background on .active). */
   color: var(--muted-foreground);
@@ -1285,10 +1284,16 @@ button {
   font-weight: 500;
 }
 
-.chip-category svg {
+/* Base for every .category-icon (an icon-font glyph, not inline SVG —
+   see categoryIconHtml() in shared.js) — line-height: 1 keeps the
+   font's own metrics from adding stray vertical space next to text. */
+.category-icon {
+  line-height: 1;
+}
+
+.chip-category .category-icon {
   flex-shrink: 0;
-  width: 16px;
-  height: 16px;
+  font-size: 16px;
 }
 
 /* Table-row variant (Inventory/History table cells only) — the full
@@ -1300,9 +1305,8 @@ button {
   font-size: 12px;
 }
 
-.chip-category-sm svg {
-  width: 14px;
-  height: 14px;
+.chip-category-sm .category-icon {
+  font-size: 14px;
 }
 
 /* New Item modal */

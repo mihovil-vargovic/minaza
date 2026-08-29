@@ -45,7 +45,7 @@
     var chip = document.createElement('button');
     chip.type = 'button';
     chip.className = withIcon ? 'chip chip-category' : 'chip';
-    if (withIcon) chip.innerHTML = storageBase.categoryIconSvg(value);
+    if (withIcon) chip.innerHTML = storageBase.categoryIconHtml(value);
     var chipLabel = document.createElement('span');
     chipLabel.textContent = label;
     chip.appendChild(chipLabel);

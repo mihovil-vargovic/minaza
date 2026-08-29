@@ -23,23 +23,24 @@
     return BASE_CATEGORIES.concat(extra);
   }
 
-  // One small hand-authored icon per base category (same 24x24 stroke
-  // style as the rest of the app's icons), plus a generic fallback for
-  // any category appended from real usage that isn't in this fixed set.
-  // 12x12 to match shadcn/ui's Badge spec ([&>svg]:size-3, i.e. 0.75rem).
-  var ICON_ATTRS = 'viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+  // Phosphor Icons' duotone set (loaded via CDN — see the <link> in
+  // index.html), one glyph name per base category, plus a generic
+  // fallback for any category appended from real usage that isn't in
+  // this fixed set. Rendered as a font glyph (<i class="ph-duotone
+  // ph-...">), not inline SVG — see .category-icon in app.css for
+  // sizing/color.
   var CATEGORY_ICONS = {
-    'Jams': '<path d="M8 4h8v3a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V4z"></path><path d="M7 8h10l1 12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L7 8z"></path>',
-    'Vegetables': '<path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 9-9h5v5c0 5-4 9-9 9z"></path><path d="M4 21c4-4 6-7 9-13"></path>',
-    'Oil & Acid': '<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"></path>',
-    'Tomato': '<circle cx="12" cy="14" r="7"></circle><path d="M9 7c1-2 5-2 6 0"></path><path d="M12 7V5"></path>',
-    'Toilet': '<rect x="3" y="6" width="14" height="12" rx="2"></rect><circle cx="10" cy="12" r="3"></circle><path d="M17 9c2 0 4 1.5 4 3.5S19 16 17 16"></path>',
-    'Fruit': '<path d="M12 8c-4 0-7 3-7 7a6 6 0 0 0 11.5 2.3A6 6 0 0 0 19 15c0-4-3-7-7-7z"></path><path d="M12 8c0-2 1-3 1-3"></path><path d="M12 5c1-1 2-1 3 0"></path>'
+    'Jams': 'jar',
+    'Vegetables': 'carrot',
+    'Oil & Acid': 'drop',
+    'Tomato': 'orange',
+    'Toilet': 'toilet',
+    'Fruit': 'basket'
   };
-  var FALLBACK_ICON = '<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.73V8z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line>';
+  var FALLBACK_ICON = 'package';
 
-  function categoryIconSvg(name) {
-    return '<svg ' + ICON_ATTRS + '>' + (CATEGORY_ICONS[name] || FALLBACK_ICON) + '</svg>';
+  function categoryIconHtml(name) {
+    return '<i class="ph-duotone ph-' + (CATEGORY_ICONS[name] || FALLBACK_ICON) + ' category-icon"></i>';
   }
 
   // One badge builder for every place a category is shown read-only
@@ -53,7 +54,7 @@
   function buildCategoryBadge(name, opts) {
     var el = document.createElement('span');
     el.className = (opts && opts.small) ? 'chip-category chip-category-sm' : 'chip-category';
-    el.innerHTML = categoryIconSvg(name);
+    el.innerHTML = categoryIconHtml(name);
     var label = document.createElement('span');
     label.className = 'chip-category-label';
     label.textContent = name;
@@ -97,7 +98,7 @@
     BASE_CATEGORIES: BASE_CATEGORIES,
     UNITS: UNITS,
     categoryList: categoryList,
-    categoryIconSvg: categoryIconSvg,
+    categoryIconHtml: categoryIconHtml,
     buildCategoryBadge: buildCategoryBadge,
     initTilt: initTilt
   });

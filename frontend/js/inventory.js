@@ -219,7 +219,7 @@
     // "All categories" isn't a real category — no icon for it, same
     // trusted-icon/untrusted-label split as buildCategoryChips.
     if (value) {
-      btn.innerHTML = storageBase.categoryIconSvg(value);
+      btn.innerHTML = storageBase.categoryIconHtml(value);
     }
     var labelEl = document.createElement('span');
     labelEl.textContent = label;
@@ -769,7 +769,7 @@
       // category label is untrusted data, so it goes in via a separate
       // textContent-set span rather than being concatenated into the
       // same innerHTML string.
-      chip.innerHTML = storageBase.categoryIconSvg(c);
+      chip.innerHTML = storageBase.categoryIconHtml(c);
       var chipLabel = document.createElement('span');
       chipLabel.textContent = c;
       chip.appendChild(chipLabel);
