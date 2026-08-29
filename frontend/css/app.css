@@ -535,6 +535,7 @@ button {
    History icon) end up sized/spaced. */
 .page-header .inv-controls {
   margin-left: auto;
+  margin-right: -10px;
 }
 
 .page-header h2 {
