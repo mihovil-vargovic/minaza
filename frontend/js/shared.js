@@ -83,11 +83,19 @@
       // Shadow shifts opposite the tilt, like a light source overhead —
       // reinforces the 3D effect instead of just rotating flatly.
       el.style.boxShadow = (-px * 22).toFixed(1) + 'px ' + (-py * 22 + 6).toFixed(1) + 'px 24px rgba(0, 0, 0, 0.18)';
+      // Drives the .qr-box::after holo sheen (see app.css) — same cursor
+      // read as the tilt above, just remapped from the -0.5..0.5 offset
+      // to a 0-100% background-position so the gradient slides under the
+      // cursor instead of staying fixed while the card tilts under it.
+      el.style.setProperty('--holo-x', ((px + 0.5) * 100).toFixed(1) + '%');
+      el.style.setProperty('--holo-y', ((py + 0.5) * 100).toFixed(1) + '%');
     }
 
     function onLeave() {
       el.style.transform = '';
       el.style.boxShadow = '';
+      el.style.removeProperty('--holo-x');
+      el.style.removeProperty('--holo-y');
     }
 
     el.addEventListener('mousemove', onMove);

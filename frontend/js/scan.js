@@ -126,8 +126,8 @@
 
     if (!ID_PATTERN.test(value)) {
       // Distinct from "item not found" per planning5 — this decoded fine
-      // but clearly isn't a Storage Base label at all.
-      storageBase.toast('That doesn\'t look like a Storage Base label.', { type: 'error' });
+      // but clearly isn't a Minaza label at all.
+      storageBase.toast('That doesn\'t look like a Minaza label.', { type: 'error' });
       return;
     }
     lookupAndOpen(value);

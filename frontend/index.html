@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Storage Base</title>
-<link rel="manifest" href="manifest.webmanifest?v=58">
+<title>Minaza</title>
+<link rel="manifest" href="manifest.webmanifest?v=68">
 <meta name="theme-color" content="#fafafa">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Storage Base">
-<link rel="stylesheet" href="css/tokens.css?v=58">
-<link rel="stylesheet" href="css/app.css?v=58">
+<meta name="apple-mobile-web-app-title" content="Minaza">
+<link rel="stylesheet" href="css/tokens.css?v=68">
+<link rel="stylesheet" href="css/app.css?v=68">
 <!-- Duotone category icons (Jams/Vegetables/Oil & Acid/Tomato/Toilet/
      Fruit + the generic fallback) — see categoryIconHtml() in shared.js.
      Needs network on first load; nothing else in the app depends on it. -->
@@ -22,7 +22,7 @@
 
 <div id="gate" class="gate">
   <form id="gate-form" class="gate-card">
-    <h1 class="gate-title">Storage Base</h1>
+    <h1 class="gate-title">Minaza</h1>
     <input id="gate-input" class="gate-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Access code">
     <div id="gate-error" class="gate-error" hidden></div>
     <button id="gate-button" class="btn btn-primary gate-button" type="submit">Unlock</button>
@@ -56,9 +56,8 @@
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             </button>
             <div class="inv-controls">
-              <button id="inv-search-btn" class="search-trigger" type="button" aria-label="Search items" aria-haspopup="dialog">
+              <button id="inv-search-btn" class="search-trigger" type="button" aria-label="Search items (&#8984;K)" aria-haspopup="dialog">
                 <svg class="search-trigger-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <span class="search-trigger-label">Search items</span>
                 <span class="search-trigger-kbd">&#8984;K</span>
               </button>
               <div class="category-filter-wrap">
@@ -94,6 +93,25 @@
         </div>
 
         <aside id="inv-detail-panel" class="inventory-detail-panel">
+          <div id="inv-detail-skeleton" class="inventory-detail-content" hidden>
+            <div class="inventory-detail-header">
+              <div class="skeleton-line skeleton-line-detail-title"></div>
+              <div class="skeleton-line skeleton-detail-menu-btn"></div>
+            </div>
+            <div class="label-preview">
+              <div class="qr-box"><div class="skeleton-line skeleton-qr-canvas"></div></div>
+              <div class="skeleton-line skeleton-line-detail-id"></div>
+            </div>
+            <table class="detail-kv-table">
+              <tbody>
+                <tr><th><div class="skeleton-line skeleton-line-kv-label"></div></th><td><div class="skeleton-line skeleton-line-kv-value skeleton-line-kv-name"></div></td></tr>
+                <tr><th><div class="skeleton-line skeleton-line-kv-label"></div></th><td><div class="skeleton-line skeleton-line-kv-value skeleton-line-kv-amount"></div></td></tr>
+                <tr><th><div class="skeleton-line skeleton-line-kv-label"></div></th><td><div class="skeleton-line skeleton-line-kv-value skeleton-line-kv-expiry"></div></td></tr>
+                <tr><th><div class="skeleton-line skeleton-line-kv-label"></div></th><td><div class="skeleton-line skeleton-line-kv-value skeleton-line-kv-category"></div></td></tr>
+                <tr><th><div class="skeleton-line skeleton-line-kv-label"></div></th><td><div class="skeleton-line skeleton-line-kv-value skeleton-line-kv-notes"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
           <div id="inv-detail-empty" class="inventory-detail-empty">
             <p class="placeholder">Select an item to see details.</p>
           </div>
@@ -105,6 +123,7 @@
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="12" cy="5" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="12" cy="19" r="1.5"></circle></svg>
                 </button>
                 <div id="detail-menu" class="category-menu detail-menu" hidden>
+                  <button type="button" class="category-menu-item" id="detail-edit-btn">Edit item</button>
                   <button type="button" class="category-menu-item" id="detail-reprint-btn">Reprint</button>
                   <button type="button" class="category-menu-item" id="detail-download-btn">Download</button>
                   <div class="category-menu-divider"></div>
@@ -126,14 +145,6 @@
                 <tr><th>Notes</th><td id="detail-kv-notes"></td></tr>
               </tbody>
             </table>
-
-            <div id="detail-delete-confirm" class="delete-confirm item-view-danger" hidden>
-              <p class="delete-confirm-text">Delete this item permanently? This can't be undone and it won't appear in History.</p>
-              <div class="delete-confirm-actions">
-                <button id="detail-delete-cancel" class="btn btn-tertiary" type="button">Cancel</button>
-                <button id="detail-delete-confirm-btn" class="btn btn-destructive" type="button">Delete permanently</button>
-              </div>
-            </div>
           </div>
         </aside>
       </div>
@@ -177,14 +188,14 @@
               <span>MacBook</span>
             </li>
           </ul>
-          <p class="settings-note">Illustrative only — Storage Base doesn't track real device activity.</p>
+          <p class="settings-note">Illustrative only — Minaza doesn't track real device activity.</p>
         </section>
 
         <section class="settings-section">
           <h3 class="settings-section-title">Version</h3>
           <ul class="settings-device-list">
             <li class="settings-device-row">
-              <span>Storage Base 1.0.0</span>
+              <span>Minaza 1.0.0</span>
             </li>
           </ul>
         </section>
@@ -362,6 +373,19 @@
   </div>
 </div>
 
+<div id="delete-confirm-modal" class="modal-overlay" hidden>
+  <div class="modal delete-confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-confirm-title">
+    <div class="modal-body">
+      <h2 id="delete-confirm-title" class="modal-title">Delete item?</h2>
+      <p class="delete-confirm-text">This can't be undone and it won't appear in History.</p>
+    </div>
+    <div class="modal-footer">
+      <button id="detail-delete-cancel" class="btn btn-tertiary" type="button">Cancel</button>
+      <button id="detail-delete-confirm-btn" class="btn btn-destructive" type="button">Delete permanently</button>
+    </div>
+  </div>
+</div>
+
 <div id="item-sheet" class="item-sheet" hidden>
   <div class="item-sheet-body">
     <div id="item-sheet-content"></div>
@@ -389,13 +413,13 @@
 <script src="config.local.js"></script>
 <script src="js/vendor/qrcode.min.js"></script>
 <script src="js/vendor/jsQR.min.js"></script>
-<script src="js/shared.js?v=58"></script>
-<script src="js/app.js?v=58"></script>
-<script src="js/toast.js?v=58"></script>
-<script src="js/inventory.js?v=58"></script>
-<script src="js/history.js?v=58"></script>
-<script src="js/search.js?v=58"></script>
-<script src="js/scan.js?v=58"></script>
+<script src="js/shared.js?v=68"></script>
+<script src="js/app.js?v=68"></script>
+<script src="js/toast.js?v=68"></script>
+<script src="js/inventory.js?v=68"></script>
+<script src="js/history.js?v=68"></script>
+<script src="js/search.js?v=68"></script>
+<script src="js/scan.js?v=68"></script>
 <script>window.storageBase.init();</script>
 </body>
 </html>

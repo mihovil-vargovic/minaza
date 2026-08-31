@@ -35,6 +35,9 @@ function doGet(e) {
         case 'create':
           result = createItem_(e.parameter);
           break;
+        case 'update':
+          result = updateItem_(e.parameter.id, e.parameter);
+          break;
         case 'remove':
           result = removeItem_(e.parameter.id);
           break;
@@ -141,6 +144,37 @@ function createItem_(p) {
     ''
   ]);
   return { ok: true, item: getItem_(id) };
+}
+
+// Edits an existing item's fields in place — same validation as create,
+// but id and removedAt are untouched (desktop-only per planning5, same
+// as delete).
+function updateItem_(id, p) {
+  const name = (p.name || '').trim();
+  if (!name) return { ok: false, error: 'name_required' };
+
+  const amount = Number(p.amount);
+  if (!p.amount || !isFinite(amount) || amount <= 0) return { ok: false, error: 'amount_invalid' };
+
+  const unit = (p.unit || '').trim();
+  if (!unit) return { ok: false, error: 'unit_required' };
+
+  const sheet = getSheet_();
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === id) {
+      sheet.getRange(i + 1, 2, 1, 6).setValues([[
+        name,
+        (p.category || '').trim(),
+        amount,
+        unit,
+        p.expiryDate || '',
+        p.notes || ''
+      ]]);
+      return { ok: true, item: getItem_(id) };
+    }
+  }
+  return { ok: false, error: 'not_found' };
 }
 
 // Soft-remove: sets removedAt, keeps the row — what powers History.

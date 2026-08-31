@@ -1,6 +1,6 @@
 {
-  "name": "Storage Base",
-  "short_name": "Storage Base",
+  "name": "Minaza",
+  "short_name": "Minaza",
   "description": "Household QR-inventory tracker — scan a label to add or remove an item.",
   "start_url": "./index.html",
   "scope": "./",

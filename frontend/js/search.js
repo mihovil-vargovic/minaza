@@ -62,7 +62,7 @@
 
   function render() {
     var q = input.value.trim().toLowerCase();
-    clearBtn.hidden = !q;
+    clearBtn.hidden = q.length < 3;
     resultsEl.innerHTML = '';
 
     // Empty until there's a query or an active category filter — per

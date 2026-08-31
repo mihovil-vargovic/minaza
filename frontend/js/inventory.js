@@ -7,6 +7,7 @@
   var selectedCategory = ''; // New Item form's category chip selection
   var selectedUnit = '';
   var createdItem = null;
+  var editingItem = null; // non-null while the New Item modal is repurposed to edit an existing item
   var selectedItemId = null; // desktop detail-panel selection only
 
   function isDesktop() {
@@ -37,6 +38,7 @@
   var downloadBtn = document.getElementById('ni-download');
 
   var stageForm = document.getElementById('new-item-stage-form');
+  var stageFormTitle = document.getElementById('new-item-title');
   var stageLabel = document.getElementById('new-item-stage-label');
   var footerForm = document.getElementById('new-item-footer-form');
   var footerLabel = document.getElementById('new-item-footer-label');
@@ -66,6 +68,7 @@
     notes: document.getElementById('iv-kv-notes')
   };
 
+  var detailSkeleton = document.getElementById('inv-detail-skeleton');
   var detailEmpty = document.getElementById('inv-detail-empty');
   var detailContent = document.getElementById('inv-detail-content');
   var detailTitle = document.getElementById('detail-title');
@@ -79,12 +82,13 @@
     notes: document.getElementById('detail-kv-notes')
   };
   var detailDeleteBtn = document.getElementById('detail-delete-btn');
-  var detailDeleteConfirm = document.getElementById('detail-delete-confirm');
+  var detailDeleteConfirm = document.getElementById('delete-confirm-modal');
   var detailDeleteCancel = document.getElementById('detail-delete-cancel');
   var detailDeleteConfirmBtn = document.getElementById('detail-delete-confirm-btn');
 
   var detailMenuBtn = document.getElementById('detail-menu-btn');
   var detailMenu = document.getElementById('detail-menu');
+  var detailEditBtn = document.getElementById('detail-edit-btn');
   var detailReprintBtn = document.getElementById('detail-reprint-btn');
   var detailDownloadBtn = document.getElementById('detail-download-btn');
 
@@ -129,6 +133,11 @@
       stateEl.hidden = true;
       tableCard.hidden = false;
       renderSkeleton();
+      if (isDesktop()) {
+        detailSkeleton.hidden = false;
+        detailEmpty.hidden = true;
+        detailContent.hidden = true;
+      }
       return;
     }
 
@@ -291,6 +300,32 @@
     updateDesktopSelection(filtered);
   }
 
+  // Inventory table's Expiry column only (desktop-visible; hidden by CSS
+  // on mobile, see buildRow's own comment) — "D/M/YYYY (relative)" per
+  // desktop-iteration.md. expiryDate is the <input type="date"> value
+  // (YYYY-MM-DD); parsed as local midnight, not via `new Date(string)`
+  // (which reads it as UTC midnight and can display a day early in any
+  // timezone behind UTC).
+  function formatExpiryCell(expiryDate) {
+    if (!expiryDate) return '—';
+    var parts = expiryDate.split('-');
+    var y = Number(parts[0]), m = Number(parts[1]), d = Number(parts[2]);
+    var expiry = new Date(y, m - 1, d);
+    var now = new Date();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    var dateLabel = d + '/' + m + '/' + y;
+
+    var diffDays = Math.round((expiry - today) / 86400000);
+    var relLabel;
+    if (diffDays < 0) relLabel = 'expired';
+    else if (diffDays === 0) relLabel = 'today';
+    else if (diffDays > 31) relLabel = Math.round(diffDays / 30) + 'm';
+    else relLabel = diffDays + 'd';
+
+    return dateLabel + ' (' + relLabel + ')';
+  }
+
   // Table row, used on both desktop and mobile. Desktop selects the row
   // into the persistent side panel; mobile (no room for a panel) opens
   // the existing read-only modal instead.
@@ -318,7 +353,7 @@
 
     var expTd = document.createElement('td');
     expTd.className = 'inv-row-expiry';
-    expTd.textContent = item.expiryDate || '—';
+    expTd.textContent = formatExpiryCell(item.expiryDate);
     tr.appendChild(expTd);
 
     tr.addEventListener('click', function () {
@@ -496,16 +531,23 @@
       refs.deleteConfirmBtn.textContent = 'Delete permanently';
     }
 
-    // deleteBtn now lives inside the "⋮" menu (see detailDeleteBtn's own
-    // click listener below, which closes that menu) rather than being a
-    // standalone link below the table — it doesn't need hiding/showing
-    // itself, just needs to reveal the confirm block.
+    // deleteBtn lives inside the "⋮" menu (see detailDeleteBtn's own
+    // click listener below, which closes that menu) — clicking it opens
+    // the #delete-confirm-modal dialog rather than revealing inline text.
     if (hasDelete) {
       refs.deleteBtn.addEventListener('click', function () {
         refs.deleteConfirm.hidden = false;
       });
 
       refs.deleteCancel.addEventListener('click', resetDeleteConfirm);
+
+      refs.deleteConfirm.addEventListener('click', function (e) {
+        if (e.target === refs.deleteConfirm) resetDeleteConfirm();
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !refs.deleteConfirm.hidden) resetDeleteConfirm();
+      });
 
       refs.deleteConfirmBtn.addEventListener('click', function () {
         if (!item) return;
@@ -578,6 +620,7 @@
   // ---- Desktop detail-panel selection ----
   function selectDesktopItem(item) {
     selectedItemId = item.id;
+    detailSkeleton.hidden = true;
     detailEmpty.hidden = true;
     detailContent.hidden = false;
     panelController.render(item);
@@ -586,6 +629,7 @@
 
   function clearDesktopSelection() {
     selectedItemId = null;
+    detailSkeleton.hidden = true;
     detailEmpty.hidden = false;
     detailContent.hidden = true;
   }
@@ -642,6 +686,12 @@
     if (e.key === 'Escape' && !detailMenu.hidden) closeDetailMenu();
   });
 
+  detailEditBtn.addEventListener('click', function () {
+    var item = panelController.getItem();
+    closeDetailMenu();
+    if (item) openEditModal(item);
+  });
+
   detailReprintBtn.addEventListener('click', function () {
     var item = panelController.getItem();
     closeDetailMenu();
@@ -670,6 +720,7 @@
 
   function openPalette() {
     palette.hidden = false;
+    searchBtn.classList.add('active');
     paletteInput.value = '';
     renderPaletteResults('');
     paletteInput.focus();
@@ -677,6 +728,7 @@
 
   function closePalette() {
     palette.hidden = true;
+    searchBtn.classList.remove('active');
   }
 
   function renderPaletteResults(query) {
@@ -819,14 +871,45 @@
     renderList();
   });
 
-  // ---- New Item modal ----
+  // ---- New Item modal (also repurposed for Edit item, desktop-only per
+  // planning5 — same form/QR-preserving submit, just pre-filled and
+  // pointed at 'update' instead of 'create') ----
   function openModal() {
+    editingItem = null;
     resetForm();
     buildCategoryChips();
     buildUnitChips();
+    setModalMode('create');
     showStageForm();
     openSheet(overlay);
     nameInput.focus();
+  }
+
+  function openEditModal(item) {
+    editingItem = item;
+    resetForm();
+    nameInput.value = item.name || '';
+    selectedCategory = item.category || '';
+    amountInput.value = item.amount || '';
+    expiryInput.value = item.expiryDate || '';
+    notesInput.value = item.notes || '';
+    buildCategoryChips();
+    buildUnitChips();
+    var knownUnit = item.unit && storageBase.UNITS.indexOf(item.unit) !== -1 && item.unit !== 'other';
+    if (item.unit) {
+      selectUnit(knownUnit ? item.unit : 'other');
+      if (!knownUnit) unitOtherInput.value = item.unit;
+    }
+    setModalMode('edit');
+    showStageForm();
+    openSheet(overlay);
+    nameInput.focus();
+  }
+
+  function setModalMode(mode) {
+    var isEdit = mode === 'edit';
+    stageFormTitle.textContent = isEdit ? 'Edit item' : 'Add new item';
+    submitBtn.textContent = isEdit ? 'Save changes' : 'Add new item';
   }
 
   function closeModal() {
@@ -1027,18 +1110,27 @@
     var data = validate();
     if (!data) return;
 
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Adding…';
+    var isEdit = !!editingItem;
+    var editId = isEdit ? editingItem.id : null;
+    if (isEdit) data.id = editId;
 
-    storageBase.call('create', data).then(function (res) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = isEdit ? 'Saving…' : 'Adding…';
+
+    storageBase.call(isEdit ? 'update' : 'create', data).then(function (res) {
       if (storageBase.handleAuthFailure(res)) return;
       if (!res.ok) {
         handleServerValidationError(res.error);
         return;
       }
-      createdItem = res.item;
-      showStageLabel(createdItem);
-      storageBase.toast(createdItem.name + ' added to inventory.');
+      if (isEdit) {
+        storageBase.toast(res.item.name + ' updated.');
+        closeModal();
+      } else {
+        createdItem = res.item;
+        showStageLabel(createdItem);
+        storageBase.toast(createdItem.name + ' added to inventory.');
+      }
       loadItems();
     }).catch(function (err) {
       // Modal stays open with the form data intact — per planning5, a
@@ -1046,7 +1138,7 @@
       storageBase.toast(err.message || 'Could not reach the backend.', { type: 'error' });
     }).finally(function () {
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Add new item';
+      submitBtn.textContent = isEdit ? 'Save changes' : 'Add new item';
     });
   });
 
