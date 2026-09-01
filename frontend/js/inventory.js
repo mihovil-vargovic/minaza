@@ -104,7 +104,7 @@
 
   function loadItems() {
     if (!hasLoadedOnce) setState('loading');
-    storageBase.call('list').then(function (res) {
+    return storageBase.call('list').then(function (res) {
       if (storageBase.handleAuthFailure(res)) return;
       if (!res.ok) {
         if (!hasLoadedOnce) setState('error');
@@ -1124,14 +1124,20 @@
         return;
       }
       if (isEdit) {
-        storageBase.toast(res.item.name + ' updated.');
-        closeModal();
+        // Keep the modal (and its "Saving…" state) open until the
+        // refreshed row/detail panel has actually rendered the new
+        // values — closing right on the update response left a beat
+        // where the modal was gone but the UI still showed stale data.
+        return loadItems().then(function () {
+          storageBase.toast(res.item.name + ' updated.');
+          closeModal();
+        });
       } else {
         createdItem = res.item;
         showStageLabel(createdItem);
         storageBase.toast(createdItem.name + ' added to inventory.');
+        loadItems();
       }
-      loadItems();
     }).catch(function (err) {
       // Modal stays open with the form data intact — per planning5, a
       // failed save must not lose the user's input.

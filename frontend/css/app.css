@@ -578,7 +578,7 @@ button {
   border-radius: var(--radius);
   background: var(--background);
   box-shadow: var(--shadow-sm);
-  padding: var(--space-4);
+  padding: var(--space-4) var(--space-4) var(--space-1);
   position: sticky;
   top: 0;
 }

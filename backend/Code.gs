@@ -95,6 +95,20 @@ function generateId_() {
 function rowToObj_(row) {
   const obj = {};
   HEADERS.forEach((h, i) => obj[h] = row[i]);
+  // Sheets auto-detects a "looks like a date" string written into a cell
+  // and silently converts the cell to a real Date value; getValues() then
+  // hands back a JS Date instead of the plain YYYY-MM-DD string the
+  // frontend expects (it does expiryDate.split('-')). Normalize back to
+  // that shape using the spreadsheet's own timezone — the same timezone
+  // Sheets used to interpret the string in the first place — so the
+  // calendar date round-trips exactly.
+  if (obj.expiryDate instanceof Date) {
+    obj.expiryDate = Utilities.formatDate(
+      obj.expiryDate,
+      SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone(),
+      'yyyy-MM-dd'
+    );
+  }
   return obj;
 }
 
