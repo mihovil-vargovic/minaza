@@ -2,7 +2,7 @@
   // One shared category/unit source for desktop's New Item quick-pick,
   // desktop's Inventory filter, and (later) mobile's chip row — per
   // ../_prd/planning5, these must not be maintained in three places.
-  var BASE_CATEGORIES = ['Jams', 'Vegetables', 'Oil & Acid', 'Tomato', 'Toilet', 'Fruit'];
+  var BASE_CATEGORIES = ['Jams', 'Vegetables', 'Oil & Acid', 'Cans', 'Toilet', 'Fruit'];
   var UNITS = ['kg', 'L', 'pcs', 'jar', 'pack', 'other'];
 
   // Suggested categories first, then any others already in use on real
@@ -33,7 +33,7 @@
     'Jams': 'jar',
     'Vegetables': 'carrot',
     'Oil & Acid': 'drop',
-    'Tomato': 'orange',
+    'Cans': 'cylinder',
     'Toilet': 'toilet',
     'Fruit': 'basket'
   };
