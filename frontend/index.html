@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Minaza</title>
-<link rel="manifest" href="manifest.webmanifest?v=74">
+<link rel="manifest" href="manifest.webmanifest?v=76">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" href="icons/icon-192.png?v=74">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=74">
+<link rel="icon" href="icons/icon-192.png?v=76">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=76">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Minaza">
-<link rel="stylesheet" href="css/tokens.css?v=74">
-<link rel="stylesheet" href="css/app.css?v=74">
+<link rel="stylesheet" href="css/tokens.css?v=76">
+<link rel="stylesheet" href="css/app.css?v=76">
 <!-- Duotone category icons (Jams/Vegetables/Oil & Acid/Cans/Toilet/
      Fruit + the generic fallback) — see categoryIconHtml() in shared.js.
      Needs network on first load; nothing else in the app depends on it. -->
@@ -52,9 +52,6 @@
         <div class="inventory-list-pane">
           <div class="page-header">
             <h2>Inventory</h2>
-            <button id="inv-history-btn" class="btn-icon inv-history-btn" type="button" data-view="history" aria-label="View history">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            </button>
             <div class="inv-controls">
               <button id="inv-search-btn" class="search-trigger" type="button" aria-label="Search items (&#8984;K)" aria-haspopup="dialog">
                 <svg class="search-trigger-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -151,7 +148,7 @@
     </section>
     <section class="view-panel" data-view-panel="history" data-nav="push" hidden>
       <div class="page-header">
-        <button id="hist-back-btn" class="btn-icon btn-icon-ghost hist-back-btn" type="button" data-view="inventory" aria-label="Back to Inventory">
+        <button id="hist-back-btn" class="btn-icon btn-icon-ghost hist-back-btn" type="button" data-view="settings" aria-label="Back to Settings">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </button>
         <h2>History</h2>
@@ -176,6 +173,14 @@
       <h2>Settings</h2>
 
       <div class="settings-content">
+        <section class="settings-section settings-history-section">
+          <button type="button" class="settings-nav-row" data-view="history">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>Removed items</span>
+            <svg class="settings-nav-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </section>
+
         <section class="settings-section">
           <h3 class="settings-section-title">Devices using this code</h3>
           <ul class="settings-device-list">
@@ -413,13 +418,13 @@
 <script src="config.local.js"></script>
 <script src="js/vendor/qrcode.min.js"></script>
 <script src="js/vendor/jsQR.min.js"></script>
-<script src="js/shared.js?v=74"></script>
-<script src="js/app.js?v=74"></script>
-<script src="js/toast.js?v=74"></script>
-<script src="js/inventory.js?v=74"></script>
-<script src="js/history.js?v=74"></script>
-<script src="js/search.js?v=74"></script>
-<script src="js/scan.js?v=74"></script>
+<script src="js/shared.js?v=76"></script>
+<script src="js/app.js?v=76"></script>
+<script src="js/toast.js?v=76"></script>
+<script src="js/inventory.js?v=76"></script>
+<script src="js/history.js?v=76"></script>
+<script src="js/search.js?v=76"></script>
+<script src="js/scan.js?v=76"></script>
 <script>window.storageBase.init();</script>
 </body>
 </html>
