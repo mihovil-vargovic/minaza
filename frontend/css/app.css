@@ -335,6 +335,18 @@ button {
 }
 
 @media (max-width: 1023px) {
+  /* On desktop body stays --page-background so .content reads as a
+     floating card on a canvas (see the comment on body above) — but on
+     mobile .content goes full-bleed (no margin/radius/shadow, see
+     below), so body's own color is never meant to show at all. If any
+     gap ever exposes it anyway (a viewport-height recalculation, an
+     overscroll bounce, a future layout change), matching it to
+     --card-background here means that gap reads as an ordinary content
+     seam instead of a visibly different-colored rectangle. */
+  body {
+    background: var(--card-background);
+  }
+
   .sidebar {
     display: none;
   }
