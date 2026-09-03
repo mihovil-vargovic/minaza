@@ -845,9 +845,67 @@ button {
     overflow-x: auto;
   }
 
+  /* Mobile Inventory drops the boxed "card" look entirely (border/
+     radius/shadow/own background) — the table just runs the full width
+     of the content area instead of sitting inside its own framed
+     rectangle. Scoped to #inv-table-card specifically: History reuses
+     .inv-table-card's class too, but keeps its own bordered-card look
+     since its mobile view is cards (.hist-cards), not this table.
+     Negative margin + matching width bleed past .view-panel's own
+     space-4 (16px) edge padding, so the row dividers (.inv-row td's
+     border-bottom, spanning the table's full width via border-collapse)
+     reach the actual screen edges instead of stopping 16px short of
+     them — per direct request. Cell padding below is bumped to space-4
+     to compensate, so the text itself still lines up with the page
+     title above it. */
+  #inv-table-card {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: none;
+    margin-left: calc(-1 * var(--space-4));
+    margin-right: calc(-1 * var(--space-4));
+    width: calc(100% + var(--space-4) * 2);
+  }
+
+  /* Column headers are all icon/value-only on mobile now (see the
+     per-column rules below) — an empty header bar left no purpose, so
+     the whole row is dropped rather than kept around empty. */
+  #inv-table-card thead {
+    display: none;
+  }
+
   .inv-table th,
   .inv-row td {
     padding: var(--space-2) var(--space-3);
+  }
+
+  /* Explicit 52px row height per direct request (was ~45.5px: 8px+8px
+     padding + the shared 28px body line-height + a 1px divider) —
+     set directly instead of via padding math so it lands on exactly
+     52px regardless of border-bottom being present or not (box-sizing:
+     border-box means the border is included inside a fixed height, not
+     added on top). vertical-align centers the single line of text
+     inside that box. Horizontal padding bumped to space-4 (16px) to
+     match #inv-table-card's edge-to-edge bleed above, so text still
+     lines up with the page title instead of sitting flush against the
+     new true screen edge. */
+  #inv-table-card .inv-table th,
+  #inv-table-card .inv-row td {
+    height: 52px;
+    vertical-align: middle;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  /* Amount (and any other plain cell) was inheriting the smaller
+     var(--text-small) (14px) while .inv-row-name sits at var(--text-p)
+     (16px) — per direct request, every cell in the mobile table now
+     reads at the same 16px instead of two sizes mixed in one row. */
+  #inv-table-card .inv-row td {
+    font-size: var(--text-p);
   }
 
   /* Default table-layout:auto sizes columns from whichever content is
@@ -867,9 +925,9 @@ button {
     width: 63%;
   }
 
-  /* Header text hidden below (.inv-th-category-label) — the real cells
-     only ever hold a 24px icon on mobile, so the column only needs to
-     be icon-wide now, not header-text-wide. */
+  /* The real cells only ever hold a 24px icon on mobile, so the column
+     only needs to be icon-wide (the header that used to need extra
+     room for "Category" text is gone entirely now — see thead above). */
   #inv-table-card .inv-table th:nth-child(2),
   #inv-table-card .inv-row td:nth-child(2) {
     width: 15%;
@@ -878,10 +936,6 @@ button {
   #inv-table-card .inv-table th:nth-child(3),
   #inv-table-card .inv-row td:nth-child(3) {
     width: 22%;
-  }
-
-  #inv-table-card .inv-th-category-label {
-    display: none;
   }
 
   /* Expiry doesn't fit mobile's tighter width — scoped to Inventory's
@@ -896,21 +950,32 @@ button {
      — frees up width for the Item column. Scoped to #inv-table-body
      specifically, same reasoning as Expiry above (History's own table
      is hidden entirely on mobile in favor of .hist-cards, so this never
-     applies there anyway). */
+     applies there anyway). Sized up from .chip-category-sm's own
+     24px/14px-icon defaults to match the row text now reading
+     uniformly at 16px (see .inv-row td above) — at the old size the
+     badge read as visibly undersized next to the now-bigger text on
+     both sides of it. */
   #inv-table-body .inv-row-category .chip-category-sm {
     gap: 0;
     padding: 0 var(--space-2);
-    width: 24px;
+    width: 28px;
+    height: 28px;
+  }
+
+  #inv-table-body .inv-row-category .chip-category-sm .category-icon {
+    font-size: 16px;
   }
 
   #inv-table-body .inv-row-category .chip-category-label {
     display: none;
   }
 
-  /* Matches the icon-only badge width above, so the loading skeleton's
-     category pill isn't wider than the real thing it's standing in for. */
+  /* Matches the icon-only badge size above, so the loading skeleton's
+     category pill isn't a different size than the real thing it's
+     standing in for. */
   .skeleton-pill-inv-category {
-    width: 24px;
+    width: 28px;
+    height: 28px;
   }
 }
 
