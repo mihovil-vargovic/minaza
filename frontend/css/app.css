@@ -276,10 +276,12 @@ button {
   margin-bottom: var(--space-6);
 }
 
-/* History entry point — mobile only (desktop keeps its sidebar History
-   item as the sole entry point there, per direct request); shown back
-   via the mobile media query below. */
-.settings-history-section {
+/* Settings' own nav menu (Removed items / Devices / Version /
+   Changelog, each drilling into its own pushed sub-page) — mobile
+   only, desktop shows every one of these inline instead (see
+   .settings-desktop-only below); shown back via the mobile media
+   query below. */
+.settings-nav-menu {
   display: none;
 }
 
@@ -309,6 +311,10 @@ button {
 .settings-nav-row svg:first-child {
   flex-shrink: 0;
   color: var(--muted-foreground);
+}
+
+.settings-nav-menu .settings-nav-row:last-child {
+  border-bottom: none;
 }
 
 /* Pushes the trailing chevron to the row's right edge. */
@@ -372,29 +378,17 @@ button {
   flex-shrink: 0;
 }
 
-/* Rest of Settings (Devices/Version/Changelog) gets the same "no
-   title, no card, iOS style" treatment as the History row above — per
-   direct request, mobile only. Desktop keeps its section headers and
-   boxed/bordered lists unchanged. */
+/* Devices/Version/Changelog's full inline content (title + boxed
+   list) is desktop-only — on mobile each is instead a one-line entry
+   in .settings-nav-menu that drills into its own pushed sub-page
+   (data-view-panel="settings-devices" etc., see index.html), the same
+   pattern History uses. The content itself is duplicated between the
+   two (impractical to share: one is inline markup inside the Settings
+   panel, the other its own top-level .view-panel) — if you're editing
+   the device list, version string, or changelog, update both copies. */
 @media (max-width: 1023px) {
-  .settings-section-title {
+  .settings-desktop-only {
     display: none;
-  }
-
-  .settings-device-list {
-    border: none;
-    border-radius: 0;
-    background: none;
-  }
-
-  /* Card's own padding is dropped along with it — the row's horizontal
-     padding was there to keep content clear of the card's edge, which
-     no longer exists. Without this, rows would sit inset an extra 16px
-     from the true edge on top of .view-panel's own 16px, out of step
-     with .settings-nav-row's edge alignment above. */
-  .settings-device-row {
-    padding-left: 0;
-    padding-right: 0;
   }
 }
 
@@ -1123,14 +1117,14 @@ button {
   }
 
   /* History moved into Settings as its own entry point (see
-     .settings-history-section below) — mobile's Inventory header row is
-     just the title now, nothing to align it against. */
+     .settings-nav-menu below) — mobile's Inventory header row is just
+     the title now, nothing to align it against. */
 
-  /* Settings is mobile's only entry point to History now (see
-     .settings-history-section below) — shown here, hidden by the
-     section's own base display: none on desktop, which keeps its
-     sidebar History item as the sole entry point there. */
-  .settings-history-section {
+  /* Settings' nav menu (see .settings-nav-menu above) is shown here,
+     hidden by its own base display: none on desktop, which keeps
+     Devices/Version/Changelog inline and History on its sidebar item
+     there instead. */
+  .settings-nav-menu {
     display: block;
   }
 }
@@ -1232,33 +1226,35 @@ button {
 }
 
 
-/* Pushed-page back button (mobile only — desktop's History is a flat
-   sidebar destination, no back button). Mobile now reaches History via
-   Settings (.settings-history-section) rather than a header icon on
-   Inventory — this button returns there, see its data-view in
-   index.html. */
-.hist-back-btn {
+/* Pushed-page back button (mobile only — desktop reaches every one of
+   these screens as a flat sidebar/inline destination instead, no back
+   button needed). Shared by History and Settings' own drill-down
+   sub-pages (Devices/Version/Changelog) rather than styled per view —
+   any panel with data-nav="push" and a .page-header containing a
+   .push-back-btn gets the same centered-title/back-button treatment
+   automatically. */
+.push-back-btn {
   display: none;
 }
 
 @media (max-width: 1023px) {
-  .hist-back-btn {
+  .push-back-btn {
     display: inline-flex;
   }
 
   /* Centered title, iOS nav-bar style — the back button is pulled out of
      flow so it can't push the title off-center depending on its own
      width. */
-  [data-view-panel="history"] .page-header {
+  .view-panel[data-nav="push"] .page-header {
     position: relative;
     justify-content: center;
   }
 
-  [data-view-panel="history"] .page-header h2 {
+  .view-panel[data-nav="push"] .page-header h2 {
     margin: 0;
   }
 
-  [data-view-panel="history"] .hist-back-btn {
+  .view-panel[data-nav="push"] .push-back-btn {
     position: absolute;
     left: 0;
   }
