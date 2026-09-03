@@ -190,7 +190,14 @@ button {
 
 /* App shell */
 .app {
-  height: 100dvh;
+  /* svh (stable min viewport, ignores the Safari toolbar) instead of
+     dvh (which resizes live as that toolbar shows/hides on scroll) —
+     dvh here made the fixed-position .tabbar visibly jump and, mid-
+     resize, exposed a sliver of the body's page-background color below
+     it before .app's own height caught up. Standalone/installed mode
+     has no toolbar to begin with, so this only changes anything in a
+     plain Safari tab, where it now stays put. */
+  height: 100svh;
   display: flex;
 }
 
@@ -543,6 +550,15 @@ button {
   margin-left: auto;
 }
 
+/* Settings has no .page-header row, just a bare h2 — grouped here so
+   both share the Medium-weight override below. */
+[data-view-panel="settings"] > h2,
+.page-header h2 {
+  /* Browser default h2 weight is bold (700) — Medium instead, per
+     direct request. */
+  font-weight: 500;
+}
+
 .page-header h2 {
   margin: 0;
   /* .inv-controls sits taller than the title text, and the row centers
@@ -775,6 +791,9 @@ button {
   margin: 0;
   font-size: var(--text-h3);
   line-height: var(--text-h3-lh);
+  /* Browser default h3 weight is bold (700) — Medium instead, per
+     direct request. */
+  font-weight: 500;
 }
 
 .detail-menu-wrap {
@@ -833,20 +852,24 @@ button {
 
   #inv-table-card .inv-table th:nth-child(1),
   #inv-table-card .inv-row td:nth-child(1) {
-    width: 53%;
+    width: 63%;
   }
 
-  /* Wide enough to fit the "Category" header itself — the real cells
-     below it only ever hold a 24px icon on mobile, but the header text
-     doesn't shrink to match. */
+  /* Header text hidden below (.inv-th-category-label) — the real cells
+     only ever hold a 24px icon on mobile, so the column only needs to
+     be icon-wide now, not header-text-wide. */
   #inv-table-card .inv-table th:nth-child(2),
   #inv-table-card .inv-row td:nth-child(2) {
-    width: 25%;
+    width: 15%;
   }
 
   #inv-table-card .inv-table th:nth-child(3),
   #inv-table-card .inv-row td:nth-child(3) {
     width: 22%;
+  }
+
+  #inv-table-card .inv-th-category-label {
+    display: none;
   }
 
   /* Expiry doesn't fit mobile's tighter width — scoped to Inventory's
@@ -962,6 +985,15 @@ button {
      the button's. Centering both in the same line aligns them. */
   [data-view-panel="inventory"] .page-header h2 {
     align-self: center;
+  }
+
+  /* .inv-controls (the element that otherwise carries margin-left: auto
+     to pin the row's trailing content right) is display: none on
+     mobile, so nothing was pushing the History icon away from the
+     title — it sat right next to "Inventory" instead of at the row's
+     right edge. Push it directly instead. */
+  .inv-history-btn {
+    margin-left: auto;
   }
 }
 
