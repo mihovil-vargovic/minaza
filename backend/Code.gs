@@ -13,6 +13,9 @@
 const SHEET_NAME = 'Items';
 const HEADERS = ['id', 'name', 'category', 'amount', 'unit', 'expiryDate', 'notes', 'removedAt'];
 
+const DEVICES_SHEET_NAME = 'Devices';
+const DEVICE_HEADERS = ['deviceId', 'name', 'firstSeen', 'lastSeen'];
+
 function doGet(e) {
   const action = e.parameter.action;
   let result;
@@ -46,6 +49,12 @@ function doGet(e) {
           break;
         case 'delete':
           result = deleteItem_(e.parameter.id);
+          break;
+        case 'touch-device':
+          result = touchDevice_(e.parameter.deviceId, e.parameter.name);
+          break;
+        case 'list-devices':
+          result = { ok: true, devices: listDevices_() };
           break;
         default:
           result = { ok: false, error: 'unknown_action' };
@@ -231,6 +240,63 @@ function deleteItem_(id) {
     }
   }
   return { ok: false, error: 'not_found' };
+}
+
+// ---- Devices (Settings' "Devices using this code" list) ----
+// A separate sheet/tab, same spreadsheet as Items — one row per
+// browser that has unlocked the app (see getDeviceId() in
+// settings.js). name is an automatic "<browser> on <OS>" label
+// (getDeviceLabel() in settings.js) — a website can't read a device's
+// real OS-level name, so this is the closest automatic substitute.
+
+function getDevicesSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(DEVICES_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(DEVICES_SHEET_NAME);
+    sheet.appendRow(DEVICE_HEADERS);
+  }
+  return sheet;
+}
+
+function findDeviceRow_(sheet, deviceId) {
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === deviceId) return i + 1; // 1-based row index, for getRange
+  }
+  return -1;
+}
+
+// Fired once per app open (settings.js, unconditionally — no separate
+// "is this a new device?" check needed since this upserts either way).
+// name is auto-derived client-side from the browser's user-agent (a
+// website can't read the device's real OS-level name) — sent fresh on
+// every call so a device's label stays current if its browser/OS
+// changes, not just fixed at first sight.
+function touchDevice_(deviceId, name) {
+  const id = (deviceId || '').trim();
+  if (!id) return { ok: false, error: 'device_id_required' };
+  const trimmedName = (name || '').trim().slice(0, 40) || 'Unknown device';
+
+  const sheet = getDevicesSheet_();
+  const now = new Date().toISOString();
+  const rowIndex = findDeviceRow_(sheet, id);
+  if (rowIndex === -1) {
+    sheet.appendRow([id, trimmedName, now, now]);
+  } else {
+    sheet.getRange(rowIndex, 2).setValue(trimmedName);
+    sheet.getRange(rowIndex, 4).setValue(now);
+  }
+  return { ok: true };
+}
+
+function listDevices_() {
+  const data = getDevicesSheet_().getDataRange().getValues();
+  data.shift(); // drop header row
+  return data
+    .filter(row => row[0])
+    .map(row => ({ deviceId: row[0], name: row[1], firstSeen: row[2], lastSeen: row[3] }))
+    .sort((a, b) => (a.lastSeen < b.lastSeen ? 1 : -1)); // most recently seen first
 }
 
 // JSONP: fetch() from a page hosted outside script.google.com is

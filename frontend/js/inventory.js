@@ -156,7 +156,7 @@
       p.textContent = 'Could not load inventory.';
       var retry = document.createElement('button');
       retry.type = 'button';
-      retry.className = 'btn btn-tertiary';
+      retry.className = 'btn btn-primary btn-sm';
       retry.textContent = 'Retry';
       retry.addEventListener('click', loadItems);
       stateEl.appendChild(retry);

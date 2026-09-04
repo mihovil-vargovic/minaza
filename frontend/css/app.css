@@ -259,7 +259,14 @@ button {
   margin-top: 0;
 }
 
+/* margin: 0 so every container that spaces a .placeholder against
+   other content (gap on a flex parent, a fixed padding) is fully in
+   control of that spacing — a bare <p>'s own default UA margin was
+   otherwise stacking on top of it uncontrolled (e.g. #inv-list-state's
+   gap read ~12px too generous, a browser default ~1em paragraph
+   margin hiding underneath it). */
 .placeholder {
+  margin: 0;
   color: var(--muted-foreground);
 }
 
@@ -359,6 +366,18 @@ button {
 .settings-device-row svg {
   flex-shrink: 0;
   color: var(--muted-foreground);
+}
+
+/* Trailing "last seen" timestamp on a real device row (settings.js) —
+   margin-left: auto pushes just this one span to the row's right edge,
+   same trick .settings-nav-chevron uses, rather than justify-content:
+   space-between on the row (which would also split the icon away from
+   the name). */
+.settings-device-meta {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
 }
 
 .settings-note {
@@ -470,6 +489,15 @@ button {
      continuous bar with an internal divider. .tabbar itself is just a
      transparent flex row positioning those two pills — the glass
      treatment lives on .tabbar-group and .tabbar-search-btn themselves. */
+  /* Sits right at the safe area rather than stacking an extra space-3
+     (12px) on top of it — on a real iPhone that extra gap piled onto
+     the ~34px home-indicator inset put the whole bar noticeably higher
+     off the bottom edge than the iOS convention this is imitating
+     (floating tab bars — Photos, Maps — rest directly above the
+     indicator, no added margin). env()'s fallback only kicks in where
+     there's no real inset to read (older iPhones with a physical home
+     button, Android, desktop browsers), so it still clears the edge
+     there instead of sitting flush against it. */
   .tabbar {
     display: flex;
     align-items: center;
@@ -477,7 +505,7 @@ button {
     position: fixed;
     left: var(--space-4);
     right: var(--space-4);
-    bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+    bottom: env(safe-area-inset-bottom, var(--space-3));
     gap: var(--space-3);
   }
 
@@ -892,8 +920,29 @@ button {
 }
 
 @media (max-width: 1023px) {
+  /* flex column + min-height: 100% (valid here since .view-panel, the
+     parent this is a % of, has a definite height — position: absolute;
+     inset: 0) rather than plain block — lets #inv-list-state's own
+     flex: 1 (see the base rule) fill the leftover space below the
+     header and center itself in it, instead of sitting pinned to the
+     top like the table view above it does. */
+  /* align-items: stretch overrides the base rule's flex-start (above)
+     — that's a cross-axis (horizontal) property, and flex-start in a
+     column direction was shrinking .inventory-list-pane to its content
+     width and pinning it to the left instead of letting it fill the
+     full row, taking #inv-list-state's horizontal centering down with
+     it. */
   .inventory-layout {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 100%;
+  }
+
+  .inventory-list-pane {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
   }
 
   .inventory-detail-panel {
@@ -1360,12 +1409,28 @@ button {
   font-size: var(--text-small);
 }
 
+/* flex: 1 + justify-content: center only actually do anything on
+   mobile, where .inventory-list-pane is a flex column this can grow
+   inside (see the mobile media query) — true no-ops on desktop, where
+   that parent isn't a flex container, so safe to leave unscoped. */
 #inv-list-state {
   padding: var(--space-6) 0;
   display: flex;
+  flex: 1;
   flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-3);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: calc(var(--space-3) / 2);
+}
+
+/* Compact variant of .btn — same shape/weight, just a smaller tap
+   target for a secondary-feeling action sitting under a message
+   rather than in a toolbar (e.g. #inv-list-state's Retry button). */
+.btn-sm {
+  height: 32px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-small);
 }
 
 .item-grid {
