@@ -489,15 +489,13 @@ button {
      continuous bar with an internal divider. .tabbar itself is just a
      transparent flex row positioning those two pills — the glass
      treatment lives on .tabbar-group and .tabbar-search-btn themselves. */
-  /* Sits right at the safe area rather than stacking an extra space-3
-     (12px) on top of it — on a real iPhone that extra gap piled onto
-     the ~34px home-indicator inset put the whole bar noticeably higher
-     off the bottom edge than the iOS convention this is imitating
-     (floating tab bars — Photos, Maps — rest directly above the
-     indicator, no added margin). env()'s fallback only kicks in where
-     there's no real inset to read (older iPhones with a physical home
-     button, Android, desktop browsers), so it still clears the edge
-     there instead of sitting flush against it. */
+  /* Flat 16px from the true bottom edge, per direct request — two
+     earlier attempts (a plain space-3, then env(safe-area-inset-
+     bottom)) both still read as "way too high" on-device, so this
+     deliberately does NOT reserve the home-indicator safe area at all;
+     16px is measured from the physical screen edge, not from the top
+     of the safe-area inset (which would put it ~34px higher on a
+     modern iPhone — most of the earlier complaint). */
   .tabbar {
     display: flex;
     align-items: center;
@@ -505,7 +503,7 @@ button {
     position: fixed;
     left: var(--space-4);
     right: var(--space-4);
-    bottom: env(safe-area-inset-bottom, var(--space-3));
+    bottom: 16px;
     gap: var(--space-3);
   }
 
