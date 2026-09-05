@@ -38,9 +38,14 @@
     'Fruit': 'basket'
   };
   var FALLBACK_ICON = 'package';
+  // Distinct from FALLBACK_ICON: no category at all (empty/never set)
+  // reads differently from "a real category string that just isn't in
+  // the fixed set above" — per direct request.
+  var NO_CATEGORY_ICON = 'mouse';
 
   function categoryIconHtml(name) {
-    return '<i class="ph-duotone ph-' + (CATEGORY_ICONS[name] || FALLBACK_ICON) + ' category-icon"></i>';
+    var icon = !name ? NO_CATEGORY_ICON : (CATEGORY_ICONS[name] || FALLBACK_ICON);
+    return '<i class="ph-duotone ph-' + icon + ' category-icon"></i>';
   }
 
   // One badge builder for every place a category is shown read-only

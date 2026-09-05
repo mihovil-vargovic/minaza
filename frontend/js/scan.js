@@ -184,9 +184,7 @@
 
     var meta = document.createElement('div');
     meta.className = 'item-sheet-meta';
-    if (item.category) {
-      meta.appendChild(storageBase.buildCategoryBadge(item.category));
-    }
+    meta.appendChild(storageBase.buildCategoryBadge(item.category));
     var amt = document.createElement('span');
     amt.textContent = item.amount + ' ' + item.unit;
     meta.appendChild(amt);

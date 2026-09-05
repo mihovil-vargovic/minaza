@@ -144,9 +144,7 @@
     tr.appendChild(nameTd);
 
     var catTd = document.createElement('td');
-    if (item.category) {
-      catTd.appendChild(storageBase.buildCategoryBadge(item.category, { small: true }));
-    }
+    catTd.appendChild(storageBase.buildCategoryBadge(item.category, { small: true }));
     tr.appendChild(catTd);
 
     var amtTd = document.createElement('td');

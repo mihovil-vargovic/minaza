@@ -342,9 +342,10 @@
 
     var catTd = document.createElement('td');
     catTd.className = 'inv-row-category';
-    if (item.category) {
-      catTd.appendChild(storageBase.buildCategoryBadge(item.category, { small: true }));
-    }
+    // Always builds a badge now, even with no category — buildCategoryBadge/
+    // categoryIconHtml (shared.js) fall back to a dedicated "no category"
+    // icon rather than leaving the cell empty.
+    catTd.appendChild(storageBase.buildCategoryBadge(item.category, { small: true }));
     tr.appendChild(catTd);
 
     var amtTd = document.createElement('td');
@@ -385,9 +386,7 @@
 
     var meta = document.createElement('div');
     meta.className = 'item-card-meta';
-    if (item.category) {
-      meta.appendChild(storageBase.buildCategoryBadge(item.category));
-    }
+    meta.appendChild(storageBase.buildCategoryBadge(item.category));
     var amount = document.createElement('span');
     amount.className = 'item-card-amount';
     amount.textContent = item.amount + ' ' + item.unit;
@@ -502,9 +501,7 @@
         refs.kv.notes.textContent = it.notes || '—';
       } else {
         refs.meta.innerHTML = '';
-        if (it.category) {
-          refs.meta.appendChild(storageBase.buildCategoryBadge(it.category));
-        }
+        refs.meta.appendChild(storageBase.buildCategoryBadge(it.category));
         var amt = document.createElement('span');
         amt.textContent = it.amount + ' ' + it.unit;
         refs.meta.appendChild(amt);
