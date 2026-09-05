@@ -999,10 +999,20 @@ button {
      match #inv-table-card's edge-to-edge bleed above, so text still
      lines up with the page title instead of sitting flush against the
      new true screen edge. */
+  /* vertical-align: middle only works in table-cell layout — making
+     .inv-row a flex container (above) "blockifies" its <td> children
+     per spec, silently turning that into a no-op for every cell (icon
+     included, which is why the icon and item name ended up visibly
+     off-center from each other: nothing was centering either one
+     anymore, each just sat at its own box's default top). display:
+     flex + align-items: center on each cell individually replaces it,
+     doing the same job through the mechanism that actually still
+     applies. */
   #inv-table-card .inv-table th,
   #inv-table-card .inv-row td {
     height: 52px;
-    vertical-align: middle;
+    display: flex;
+    align-items: center;
     padding-top: 0;
     padding-bottom: 0;
     padding-left: var(--space-4);
@@ -1029,29 +1039,102 @@ button {
     table-layout: fixed;
   }
 
-  #inv-table-card .inv-table th:nth-child(1),
+  /* Per direct request: icon moves to the far left (before the item
+     name, first in the row) instead of sitting between name and
+     amount. A <tr> can't be reordered by touching DOM order alone
+     without also changing desktop (same markup, same three <td>s) —
+     display: flex + order on the cells reorders visually on mobile
+     only, while desktop keeps display: table-row and the original
+     name/category/amount DOM order untouched. Column percentage
+     widths are dropped in favor of natural flex sizing: the name cell
+     grows to fill the row (pushing amount to the far right, no
+     separate right-alignment rule needed), the icon and amount cells
+     stay their own content width. */
+  /* flex-wrap: wrap is the real fix for "Amount can get squeezed off
+     at an extreme width" — below, at any width a real iPhone can
+     actually be (there's no phone narrower than ~375px), everything
+     still fits on one line exactly as before. This is a defense-in-
+     depth measure on top of that, not a replacement for it: no matter
+     how narrow the container ever gets (a desktop window resized far
+     past any real device), Amount wraps onto its own line below
+     instead of being pushed past the visible/scrollable edge — it
+     stays visible either way, just not always on the same row. */
+  #inv-table-card .inv-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    /* Each cell's own border-bottom (base rule, desktop's table-row
+       layout) only spans that cell's own width — with real gaps now
+       between cells (this row's own `gap` above), that drew the
+       divider as broken segments with visible holes at each gap
+       instead of one continuous line. Moved to the row itself here;
+       the cells' own border is switched off right below. */
+    border-bottom: 1px solid var(--border);
+  }
+
+  #inv-table-card .inv-row:last-child {
+    border-bottom: none;
+  }
+
+  #inv-table-card .inv-row td {
+    border-bottom: none;
+  }
+
+  /* Each cell still carries its own space-4 (16px) left/right padding
+     (see the shared th/td rule above, for the row's outer edges) — the
+     side facing the *next* cell is zeroed here so the row's own gap
+     (above) is the only thing controlling inter-cell spacing, instead
+     of the two stacking into a much wider gap than intended. Only the
+     very first cell's left edge and the very last cell's right edge
+     keep their padding, preserving the row's outer inset. */
+  /* td.inv-row-category, not just .inv-row-category — needs the type
+     qualifier to out-specificity the shared th/td padding rule above
+     ((1,1,1) vs (1,1,0) without it), which otherwise keeps winning
+     despite coming first in the file. */
+  #inv-table-card .inv-row td.inv-row-category {
+    order: -1;
+    width: auto;
+    padding-right: 0;
+  }
+
+  /* nth-child, not .inv-row-name — the loading skeleton's row (see
+     renderSkeleton(), inventory.js) reuses .inv-row but puts a
+     differently-classed cell (.skeleton-cell-line) in this position,
+     so matching by position covers both instead of just the loaded
+     state. */
   #inv-table-card .inv-row td:nth-child(1) {
-    width: 63%;
+    order: 1;
+    flex: 1 1 auto;
+    /* Flex items default to min-width: auto, which for an unbroken
+       single-word name (no spaces to wrap on) means "never shrink
+       below this word's full width" — at a narrow enough viewport
+       that pushed the row wider than the screen, shoving Amount off
+       the visible edge entirely. min-width: 0 lets it actually shrink,
+       so overflow-wrap: anywhere (already set on .inv-row td) can do
+       its job and force-break the word instead. */
+    min-width: 0;
+    width: auto;
+    padding-left: 0;
+    padding-right: 0;
   }
 
-  /* The real cells only ever hold a 24px icon on mobile, so the column
-     only needs to be icon-wide (the header that used to need extra
-     room for "Category" text is gone entirely now — see thead above). */
-  #inv-table-card .inv-table th:nth-child(2),
-  #inv-table-card .inv-row td:nth-child(2) {
-    width: 15%;
-  }
-
-  #inv-table-card .inv-table th:nth-child(3),
   #inv-table-card .inv-row td:nth-child(3) {
-    width: 22%;
+    order: 2;
+    width: auto;
+    padding-left: 0;
+    flex: 0 0 auto;
   }
 
   /* Expiry doesn't fit mobile's tighter width — scoped to Inventory's
      table body specifically since History reuses the same
-     .inv-row-expiry class for its own "Removed" column, which stays. */
+     .inv-row-expiry class for its own "Removed" column, which stays.
+     td qualifier (not just the class) needed to out-specificity the
+     shared th/td display: flex rule above ((1,1,1) vs (1,1,0) without
+     it) — otherwise that rule wins and this column reappears as an
+     empty flex item showing just its "—" no-expiry placeholder. */
   .inv-th-expiry,
-  #inv-table-body .inv-row-expiry {
+  #inv-table-body td.inv-row-expiry {
     display: none;
   }
 
@@ -1064,27 +1147,36 @@ button {
      uniformly at 16px (see .inv-row td above) — at the old size the
      badge read as visibly undersized next to the now-bigger text on
      both sides of it. */
+  /* Per direct request: no more gray circle behind the icon — just the
+     bare glyph. Overrides .chip-category's own background/radius/size
+     (all meant for the filled-pill look used everywhere else) down to
+     nothing, leaving only enough box for the icon glyph itself. */
   #inv-table-body .inv-row-category .chip-category-sm {
     gap: 0;
-    padding: 0 var(--space-2);
-    width: 28px;
-    height: 28px;
+    padding: 0;
+    width: auto;
+    height: auto;
+    background: none;
+    border-radius: 0;
   }
 
+  /* Bumped from 16px per direct request, now that the circle
+     background is gone (see .chip-category-sm above) — the bare glyph
+     read as a little small on its own. */
   #inv-table-body .inv-row-category .chip-category-sm .category-icon {
-    font-size: 16px;
+    font-size: 20px;
   }
 
   #inv-table-body .inv-row-category .chip-category-label {
     display: none;
   }
 
-  /* Matches the icon-only badge size above, so the loading skeleton's
-     category pill isn't a different size than the real thing it's
-     standing in for. */
+  /* Matches the bare-icon size above (no more circle background), so
+     the loading skeleton's category placeholder isn't a different
+     size than the real thing it's standing in for. */
   .skeleton-pill-inv-category {
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
   }
 }
 
