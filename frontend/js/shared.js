@@ -41,7 +41,7 @@
   // Distinct from FALLBACK_ICON: no category at all (empty/never set)
   // reads differently from "a real category string that just isn't in
   // the fixed set above" — per direct request.
-  var NO_CATEGORY_ICON = 'mouse';
+  var NO_CATEGORY_ICON = 'flying-saucer';
 
   function categoryIconHtml(name) {
     var icon = !name ? NO_CATEGORY_ICON : (CATEGORY_ICONS[name] || FALLBACK_ICON);
