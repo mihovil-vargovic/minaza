@@ -118,4 +118,34 @@
   storageBase.onAppShown(function () {
     storageBase.call('touch-device', { deviceId: getDeviceId(), name: getDeviceLabel() }).catch(function () {});
   });
+
+  // ---- QR Tilt Effect toggle ----
+  // Opt-in switch for the gyroscope-driven QR tilt (see shared.js) —
+  // turning it on is the user gesture that triggers iOS's Motion &
+  // Orientation permission prompt, so this click handler is exactly
+  // where that has to happen; the toggle only shows "on" once the
+  // permission is confirmed granted, not just requested.
+  var tiltToggle = document.getElementById('settings-tilt-toggle');
+  if (tiltToggle) {
+    function syncTiltToggle() {
+      var on = storageBase.isGyroTiltEnabled();
+      tiltToggle.classList.toggle('is-on', on);
+      tiltToggle.setAttribute('aria-checked', on ? 'true' : 'false');
+    }
+    syncTiltToggle();
+
+    tiltToggle.addEventListener('click', function () {
+      if (storageBase.isGyroTiltEnabled()) {
+        storageBase.disableGyroTilt();
+        syncTiltToggle();
+        return;
+      }
+      storageBase.enableGyroTilt(function (granted) {
+        syncTiltToggle();
+        if (!granted) {
+          storageBase.toast('Motion access was denied — enable it for this site in your phone’s Settings app to use this.', { type: 'error' });
+        }
+      });
+    });
+  }
 })();

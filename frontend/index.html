@@ -190,6 +190,19 @@
             <span>Devices</span>
             <svg class="settings-nav-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
+          <!-- Opt-in, not on by default: enabling it is what triggers
+               iOS's one-time Motion & Orientation permission prompt (see
+               enableGyroTilt in shared.js) — asking for that
+               automatically the first time anyone opened an item was
+               surprising and, on iOS, re-prompted on every app launch,
+               so it's now behind an explicit switch instead. -->
+          <div class="settings-nav-row settings-nav-row-static">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="4" width="10" height="16" rx="2"></rect><path d="M3 12c0-2 1-3 3-3"></path><path d="M21 12c0 2-1 3-3 3"></path></svg>
+            <span>QR Tilt Effect</span>
+            <button type="button" id="settings-tilt-toggle" class="settings-toggle" role="switch" aria-checked="false" aria-label="QR tilt effect">
+              <span class="settings-toggle-knob"></span>
+            </button>
+          </div>
           <!-- Not a data-view button like the rows above — this one is
                inert (no sub-page to drill into), so it's a plain div
                with no chevron, just the version pinned to the row's

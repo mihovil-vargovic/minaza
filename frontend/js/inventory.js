@@ -445,10 +445,8 @@
   function openSheet(sheetOverlay) {
     // Every sheet this app opens carries a tilt-enabled QR box (Item
     // View, New Item) — re-zero the gyroscope tilt to "however the
-    // phone is held right now" each time one opens, and request motion
-    // permission on iOS the first time this ever runs (both a no-op on
-    // desktop, see shared.js). This click handler is the synchronous
-    // user gesture Safari requires for that permission prompt.
+    // phone is held right now" each time one opens (a no-op on desktop,
+    // and unless QR Tilt Effect is on in Settings, see shared.js).
     storageBase.recalibrateTilt();
     sheetOverlay.classList.remove('is-closing');
     sheetOverlay.hidden = false;

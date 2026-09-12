@@ -315,9 +315,10 @@ button {
   cursor: pointer;
 }
 
-/* Version (see index.html) — a plain <div>, not a <button>: there's no
-   sub-page to drill into, just the version number itself shown inline
-   via .settings-device-meta instead of a chevron. */
+/* Version and QR Tilt Effect (see index.html) — plain <div>s, not
+   <button>s: there's no sub-page to drill into, just an inline value
+   (the version number via .settings-device-meta) or control (the
+   .settings-toggle switch below) instead of a chevron. */
 .settings-nav-row-static {
   cursor: default;
 }
@@ -325,6 +326,42 @@ button {
 .settings-nav-row svg:first-child {
   flex-shrink: 0;
   color: var(--muted-foreground);
+}
+
+/* iOS-style switch — QR Tilt Effect is the only on/off setting in the
+   app so far, hence a bespoke control rather than a generic checkbox
+   skin. Pushed to the row's right edge the same way the chevron/meta
+   text are (margin-left: auto). */
+.settings-toggle {
+  margin-left: auto;
+  flex-shrink: 0;
+  position: relative;
+  width: 46px;
+  height: 27px;
+  padding: 2px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--border);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.settings-toggle.is-on {
+  background: var(--primary);
+}
+
+.settings-toggle-knob {
+  display: block;
+  width: 23px;
+  height: 23px;
+  border-radius: var(--radius-full);
+  background: var(--background);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.settings-toggle.is-on .settings-toggle-knob {
+  transform: translateX(19px);
 }
 
 .settings-nav-menu .settings-nav-row:last-child {

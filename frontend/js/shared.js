@@ -113,14 +113,36 @@
   // of mousemove. One shared listener drives every registered element
   // (rather than one listener per element) since there's only ever one
   // physical device to read from.
+  //
+  // Opt-in via the "QR Tilt Effect" switch in Settings (settings.js),
+  // not requested automatically the first time a QR shows up: turning
+  // it on is what triggers iOS's Motion & Orientation permission
+  // prompt, and asking for that unprompted felt surprising — worse, on
+  // iOS installed-to-Home-Screen apps don't reliably persist that grant
+  // between launches (a WebKit limitation, not something fixable from
+  // here), so an automatic request re-prompted on every app open. Gating
+  // it behind a switch at least means that only happens to someone who
+  // deliberately turned the feature on, and only once per launch.
+  var TILT_PREF_KEY = 'minazaGyroTiltEnabled';
+  var gyroPrefEnabled = false;
+  try { gyroPrefEnabled = localStorage.getItem(TILT_PREF_KEY) === 'true'; } catch (e) {}
+
   var gyroEls = [];
   var gyroBaseline = null; // { beta, gamma } — recaptured each time a tilt sheet opens, see recalibrateTilt()
   var gyroListenerAttached = false;
-  var gyroPermissionRequested = false;
   var GYRO_RANGE_DEG = 24; // physical tilt (either axis) that reaches the full mouse-equivalent swing
   var GYRO_SMOOTHING = 0.25; // low-pass filter weight for each new reading — raw gyro data is a bit jittery
   var gyroSmoothedPx = 0;
   var gyroSmoothedPy = 0;
+
+  function setGyroPref(enabled) {
+    gyroPrefEnabled = enabled;
+    try { localStorage.setItem(TILT_PREF_KEY, enabled ? 'true' : 'false'); } catch (e) {}
+  }
+
+  function isGyroTiltEnabled() {
+    return gyroPrefEnabled;
+  }
 
   function onDeviceOrientation(e) {
     if (e.beta === null || e.gamma === null) return;
@@ -139,44 +161,69 @@
     });
   }
 
-  function enableGyroTilt() {
-    if (gyroListenerAttached) return;
-    gyroListenerAttached = true;
-    window.addEventListener('deviceorientation', onDeviceOrientation);
+  // Turns the effect on right now — called from the Settings toggle's
+  // own click handler, which is the user gesture iOS 13+ requires to
+  // show its permission prompt at all. `callback(enabled)` reports
+  // whether it actually ended up on (denied/unsupported both resolve
+  // false), so the toggle UI can reflect the real outcome rather than
+  // assume success.
+  function enableGyroTilt(callback) {
+    if (gyroListenerAttached) {
+      setGyroPref(true);
+      if (callback) callback(true);
+      return;
+    }
+    if (typeof DeviceOrientationEvent === 'undefined') {
+      setGyroPref(false);
+      if (callback) callback(false);
+      return;
+    }
+    function onAttached() {
+      window.addEventListener('deviceorientation', onDeviceOrientation);
+      gyroListenerAttached = true;
+      setGyroPref(true);
+      if (callback) callback(true);
+    }
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission().then(function (state) {
+        if (state === 'granted') {
+          onAttached();
+        } else {
+          setGyroPref(false);
+          if (callback) callback(false);
+        }
+      }).catch(function () {
+        setGyroPref(false);
+        if (callback) callback(false);
+      });
+    } else {
+      onAttached();
+    }
   }
 
-  // iOS 13+ gates DeviceOrientationEvent behind an explicit permission
-  // prompt that must be requested synchronously from inside a user-
-  // gesture handler — see recalibrateTilt() below, called from
-  // openSheet() (inventory.js) right as a QR-bearing sheet opens, which
-  // is exactly such a gesture. Every other browser (Android, and desktop
-  // browsers that happen to support the event) has no such gate and
-  // just starts receiving events once enableGyroTilt() attaches the
-  // listener. Requested once per session either way — a user who denies
-  // it isn't asked again.
-  function requestGyroPermissionOnce() {
-    if (gyroPermissionRequested) return;
-    gyroPermissionRequested = true;
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      DeviceOrientationEvent.requestPermission().then(function (state) {
-        if (state === 'granted') enableGyroTilt();
-      }).catch(function () {});
-    } else if (typeof DeviceOrientationEvent !== 'undefined') {
-      enableGyroTilt();
+  function disableGyroTilt() {
+    setGyroPref(false);
+    if (gyroListenerAttached) {
+      window.removeEventListener('deviceorientation', onDeviceOrientation);
+      gyroListenerAttached = false;
     }
+    gyroBaseline = null;
+    gyroEls.forEach(clearTilt);
   }
 
   // Re-zeroes the tilt to however the phone is being held right now —
   // called every time a tilt sheet opens (see openSheet(), inventory.js)
   // so "holding it flat/normally" always reads as neutral instead of
   // whatever angle the phone happened to be at when the listener first
-  // attached. Harmless to call before permission is granted (or on
-  // desktop, where it's simply never read).
+  // attached. Also covers the case where the feature was left on from a
+  // previous visit but this fresh page load hasn't re-attached the
+  // listener yet — at most one silent re-request per launch, and only
+  // for someone who already opted in (see the comment above).
   function recalibrateTilt() {
     gyroBaseline = null;
     gyroSmoothedPx = 0;
     gyroSmoothedPy = 0;
-    requestGyroPermissionOnce();
+    if (gyroPrefEnabled && !gyroListenerAttached) enableGyroTilt();
   }
 
   function initTilt(el) {
@@ -209,6 +256,9 @@
     categoryIconHtml: categoryIconHtml,
     buildCategoryBadge: buildCategoryBadge,
     initTilt: initTilt,
-    recalibrateTilt: recalibrateTilt
+    recalibrateTilt: recalibrateTilt,
+    isGyroTiltEnabled: isGyroTiltEnabled,
+    enableGyroTilt: enableGyroTilt,
+    disableGyroTilt: disableGyroTilt
   });
 })();
