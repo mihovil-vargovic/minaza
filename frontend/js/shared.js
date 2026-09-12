@@ -67,44 +67,139 @@
     return el;
   }
 
-  // Cursor-tracked tilt/parallax for the QR "cards" (detail panel, New
-  // Item label stage, item-view modal) — call once per element; the
-  // listener stays attached across re-renders since QRCode.js only
-  // replaces the element's children, never the element itself. Skipped
-  // entirely on touch devices (no real cursor to track, and touch
-  // synthesizes mousemove unreliably) — same hover-capability guard
-  // used elsewhere in this app's CSS.
+  // Cursor-tracked (desktop) or gyroscope-tracked (touch) tilt/parallax
+  // for the QR "cards" (detail panel, New Item label stage, item-view
+  // modal) — call once per element; the listener stays attached across
+  // re-renders since QRCode.js only replaces the element's children,
+  // never the element itself.
+  var TILT_MAX_DEG = 10;
+
+  function clamp(n, lo, hi) {
+    return Math.max(lo, Math.min(hi, n));
+  }
+
+  // px/py are both -0.5..0.5 — same convention for both input sources
+  // (cursor position within the element, or gyroscope tilt relative to
+  // its baseline) so this one function drives the actual visual effect
+  // for both.
+  function applyTilt(el, px, py) {
+    var rotateY = px * TILT_MAX_DEG * 2;
+    var rotateX = -py * TILT_MAX_DEG * 2;
+    el.style.transform = 'perspective(600px) rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg) scale(1.04)';
+    // Shadow shifts opposite the tilt, like a light source overhead —
+    // reinforces the 3D effect instead of just rotating flatly.
+    el.style.boxShadow = (-px * 22).toFixed(1) + 'px ' + (-py * 22 + 6).toFixed(1) + 'px 24px rgba(0, 0, 0, 0.18)';
+    // Drives the .qr-box::after holo sheen (see app.css) — same
+    // coordinates as the tilt above, remapped from the -0.5..0.5 offset
+    // to a 0-100% background-position so the gradient slides as the
+    // card tilts. .tilt-active makes the (otherwise :hover-only) sheen
+    // visible on touch, where there's no hover state at all.
+    el.style.setProperty('--holo-x', ((px + 0.5) * 100).toFixed(1) + '%');
+    el.style.setProperty('--holo-y', ((py + 0.5) * 100).toFixed(1) + '%');
+    el.classList.add('tilt-active');
+  }
+
+  function clearTilt(el) {
+    el.style.transform = '';
+    el.style.boxShadow = '';
+    el.style.removeProperty('--holo-x');
+    el.style.removeProperty('--holo-y');
+    el.classList.remove('tilt-active');
+  }
+
+  // ---- Gyroscope tilt (touch devices) ----
+  // A phone has no cursor to track, but it does have a real tilt to
+  // read — same visual effect, driven by DeviceOrientationEvent instead
+  // of mousemove. One shared listener drives every registered element
+  // (rather than one listener per element) since there's only ever one
+  // physical device to read from.
+  var gyroEls = [];
+  var gyroBaseline = null; // { beta, gamma } — recaptured each time a tilt sheet opens, see recalibrateTilt()
+  var gyroListenerAttached = false;
+  var gyroPermissionRequested = false;
+  var GYRO_RANGE_DEG = 24; // physical tilt (either axis) that reaches the full mouse-equivalent swing
+  var GYRO_SMOOTHING = 0.25; // low-pass filter weight for each new reading — raw gyro data is a bit jittery
+  var gyroSmoothedPx = 0;
+  var gyroSmoothedPy = 0;
+
+  function onDeviceOrientation(e) {
+    if (e.beta === null || e.gamma === null) return;
+    if (!gyroBaseline) gyroBaseline = { beta: e.beta, gamma: e.gamma };
+
+    var rawPx = clamp((e.gamma - gyroBaseline.gamma) / GYRO_RANGE_DEG, -0.5, 0.5);
+    var rawPy = clamp((e.beta - gyroBaseline.beta) / GYRO_RANGE_DEG, -0.5, 0.5);
+    gyroSmoothedPx += (rawPx - gyroSmoothedPx) * GYRO_SMOOTHING;
+    gyroSmoothedPy += (rawPy - gyroSmoothedPy) * GYRO_SMOOTHING;
+
+    gyroEls.forEach(function (el) {
+      // Only elements actually visible right now — an element inside a
+      // closed sheet has no layout box, but there's no reason to churn
+      // its style every frame regardless.
+      if (el.offsetParent !== null) applyTilt(el, gyroSmoothedPx, gyroSmoothedPy);
+    });
+  }
+
+  function enableGyroTilt() {
+    if (gyroListenerAttached) return;
+    gyroListenerAttached = true;
+    window.addEventListener('deviceorientation', onDeviceOrientation);
+  }
+
+  // iOS 13+ gates DeviceOrientationEvent behind an explicit permission
+  // prompt that must be requested synchronously from inside a user-
+  // gesture handler — see recalibrateTilt() below, called from
+  // openSheet() (inventory.js) right as a QR-bearing sheet opens, which
+  // is exactly such a gesture. Every other browser (Android, and desktop
+  // browsers that happen to support the event) has no such gate and
+  // just starts receiving events once enableGyroTilt() attaches the
+  // listener. Requested once per session either way — a user who denies
+  // it isn't asked again.
+  function requestGyroPermissionOnce() {
+    if (gyroPermissionRequested) return;
+    gyroPermissionRequested = true;
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission().then(function (state) {
+        if (state === 'granted') enableGyroTilt();
+      }).catch(function () {});
+    } else if (typeof DeviceOrientationEvent !== 'undefined') {
+      enableGyroTilt();
+    }
+  }
+
+  // Re-zeroes the tilt to however the phone is being held right now —
+  // called every time a tilt sheet opens (see openSheet(), inventory.js)
+  // so "holding it flat/normally" always reads as neutral instead of
+  // whatever angle the phone happened to be at when the listener first
+  // attached. Harmless to call before permission is granted (or on
+  // desktop, where it's simply never read).
+  function recalibrateTilt() {
+    gyroBaseline = null;
+    gyroSmoothedPx = 0;
+    gyroSmoothedPy = 0;
+    requestGyroPermissionOnce();
+  }
+
   function initTilt(el) {
-    if (!el || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-    var maxTilt = 10; // degrees
+    if (!el) return;
 
-    function onMove(e) {
-      var rect = el.getBoundingClientRect();
-      var px = (e.clientX - rect.left) / rect.width - 0.5;
-      var py = (e.clientY - rect.top) / rect.height - 0.5;
-      var rotateY = px * maxTilt * 2;
-      var rotateX = -py * maxTilt * 2;
-      el.style.transform = 'perspective(600px) rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg) scale(1.04)';
-      // Shadow shifts opposite the tilt, like a light source overhead —
-      // reinforces the 3D effect instead of just rotating flatly.
-      el.style.boxShadow = (-px * 22).toFixed(1) + 'px ' + (-py * 22 + 6).toFixed(1) + 'px 24px rgba(0, 0, 0, 0.18)';
-      // Drives the .qr-box::after holo sheen (see app.css) — same cursor
-      // read as the tilt above, just remapped from the -0.5..0.5 offset
-      // to a 0-100% background-position so the gradient slides under the
-      // cursor instead of staying fixed while the card tilts under it.
-      el.style.setProperty('--holo-x', ((px + 0.5) * 100).toFixed(1) + '%');
-      el.style.setProperty('--holo-y', ((py + 0.5) * 100).toFixed(1) + '%');
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      function onMove(e) {
+        var rect = el.getBoundingClientRect();
+        var px = (e.clientX - rect.left) / rect.width - 0.5;
+        var py = (e.clientY - rect.top) / rect.height - 0.5;
+        applyTilt(el, px, py);
+      }
+      el.addEventListener('mousemove', onMove);
+      el.addEventListener('mouseleave', function () { clearTilt(el); });
+      return;
     }
 
-    function onLeave() {
-      el.style.transform = '';
-      el.style.boxShadow = '';
-      el.style.removeProperty('--holo-x');
-      el.style.removeProperty('--holo-y');
-    }
-
-    el.addEventListener('mousemove', onMove);
-    el.addEventListener('mouseleave', onLeave);
+    // Touch device: same effect, driven by the phone's real tilt (see
+    // the Gyroscope tilt section above) instead of a cursor that
+    // doesn't exist here. No-op if the browser has no orientation
+    // sensor API at all.
+    if (typeof DeviceOrientationEvent === 'undefined') return;
+    gyroEls.push(el);
   }
 
   window.storageBase = Object.assign(window.storageBase || {}, {
@@ -113,6 +208,7 @@
     categoryList: categoryList,
     categoryIconHtml: categoryIconHtml,
     buildCategoryBadge: buildCategoryBadge,
-    initTilt: initTilt
+    initTilt: initTilt,
+    recalibrateTilt: recalibrateTilt
   });
 })();

@@ -182,7 +182,7 @@
         <section class="settings-section settings-nav-menu">
           <button type="button" class="settings-nav-row" data-view="history">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            <span>Removed items</span>
+            <span>History</span>
             <svg class="settings-nav-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
           <button type="button" class="settings-nav-row" data-view="settings-devices">
@@ -190,16 +190,16 @@
             <span>Devices</span>
             <svg class="settings-nav-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
-          <button type="button" class="settings-nav-row" data-view="settings-version">
+          <!-- Not a data-view button like the rows above — this one is
+               inert (no sub-page to drill into), so it's a plain div
+               with no chevron, just the version pinned to the row's
+               right edge via .settings-device-meta (same trick a
+               device row uses for its "last seen" timestamp). -->
+          <div class="settings-nav-row settings-nav-row-static">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
             <span>Version</span>
-            <svg class="settings-nav-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-          </button>
-          <button type="button" class="settings-nav-row" data-view="settings-changelog">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-            <span>Changelog</span>
-            <svg class="settings-nav-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-          </button>
+            <span class="settings-device-meta">1.0.0</span>
+          </div>
         </section>
 
         <!-- Desktop only (see .settings-desktop-only, app.css) — mobile
@@ -221,25 +221,15 @@
             </li>
           </ul>
         </section>
-
-        <section class="settings-section settings-desktop-only">
-          <h3 class="settings-section-title">Changelog</h3>
-          <ul class="settings-device-list settings-changelog">
-            <li class="settings-device-row"><span>History, Delete &amp; Restore</span><span class="settings-changelog-date">Aug 16, 2026</span></li>
-            <li class="settings-device-row"><span>Mobile Scan &amp; Remove</span><span class="settings-changelog-date">Aug 15, 2026</span></li>
-            <li class="settings-device-row"><span>Desktop Inventory &amp; New Item</span><span class="settings-changelog-date">Aug 16, 2026</span></li>
-            <li class="settings-device-row"><span>App shell &amp; access gate</span><span class="settings-changelog-date">Aug 13, 2026</span></li>
-            <li class="settings-device-row"><span>Backend foundation</span><span class="settings-changelog-date">Aug 12, 2026</span></li>
-          </ul>
-        </section>
       </div>
     </section>
 
-    <!-- Mobile-only drill-down sub-pages for Devices/Version/Changelog
-         (see the comment on .settings-desktop-only above) — same
-         push/pop pattern as History (data-nav="push", generic
-         .push-back-btn styling in app.css), reached only from
-         .settings-nav-menu. -->
+    <!-- Mobile-only drill-down sub-page for Devices (see the comment on
+         .settings-desktop-only above) — same push/pop pattern as
+         History (data-nav="push", generic .push-back-btn styling in
+         app.css), reached only from .settings-nav-menu. Version has no
+         sub-page of its own (see .settings-nav-row-static above) so
+         there's nothing to push here for it. -->
     <section class="view-panel" data-view-panel="settings-devices" data-nav="push" hidden>
       <div class="page-header">
         <button type="button" class="btn-icon btn-icon-ghost push-back-btn" data-view="settings" aria-label="Back to Settings">
@@ -249,36 +239,6 @@
       </div>
       <ul class="settings-device-list js-devices-list"></ul>
       <p class="settings-note js-devices-empty" hidden>No devices have unlocked with this code yet.</p>
-    </section>
-
-    <section class="view-panel" data-view-panel="settings-version" data-nav="push" hidden>
-      <div class="page-header">
-        <button type="button" class="btn-icon btn-icon-ghost push-back-btn" data-view="settings" aria-label="Back to Settings">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-        </button>
-        <h2>Version</h2>
-      </div>
-      <ul class="settings-device-list">
-        <li class="settings-device-row">
-          <span>Minaza 1.0.0</span>
-        </li>
-      </ul>
-    </section>
-
-    <section class="view-panel" data-view-panel="settings-changelog" data-nav="push" hidden>
-      <div class="page-header">
-        <button type="button" class="btn-icon btn-icon-ghost push-back-btn" data-view="settings" aria-label="Back to Settings">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-        </button>
-        <h2>Changelog</h2>
-      </div>
-      <ul class="settings-device-list settings-changelog">
-        <li class="settings-device-row"><span>History, Delete &amp; Restore</span><span class="settings-changelog-date">Aug 16, 2026</span></li>
-        <li class="settings-device-row"><span>Mobile Scan &amp; Remove</span><span class="settings-changelog-date">Aug 15, 2026</span></li>
-        <li class="settings-device-row"><span>Desktop Inventory &amp; New Item</span><span class="settings-changelog-date">Aug 16, 2026</span></li>
-        <li class="settings-device-row"><span>App shell &amp; access gate</span><span class="settings-changelog-date">Aug 13, 2026</span></li>
-        <li class="settings-device-row"><span>Backend foundation</span><span class="settings-changelog-date">Aug 12, 2026</span></li>
-      </ul>
     </section>
     <section class="view-panel" data-view-panel="scan" hidden>
       <div class="scan-view">

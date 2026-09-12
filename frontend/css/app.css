@@ -270,9 +270,9 @@ button {
   color: var(--muted-foreground);
 }
 
-/* Settings — same Devices/Version/Changelog content on both desktop and
-   mobile; constrained to a readable column on desktop instead of
-   stretching edge-to-edge across the wide content pane. */
+/* Settings — same Devices/Version content on both desktop and mobile;
+   constrained to a readable column on desktop instead of stretching
+   edge-to-edge across the wide content pane. */
 @media (min-width: 1024px) {
   .settings-content {
     max-width: 480px;
@@ -283,11 +283,11 @@ button {
   margin-bottom: var(--space-6);
 }
 
-/* Settings' own nav menu (Removed items / Devices / Version /
-   Changelog, each drilling into its own pushed sub-page) — mobile
-   only, desktop shows every one of these inline instead (see
-   .settings-desktop-only below); shown back via the mobile media
-   query below. */
+/* Settings' own nav menu (History / Devices, each drilling into its
+   own pushed sub-page, plus the inert Version row — see
+   .settings-nav-row-static below) — mobile only, desktop shows every
+   one of these inline instead (see .settings-desktop-only below);
+   shown back via the mobile media query below. */
 .settings-nav-menu {
   display: none;
 }
@@ -313,6 +313,13 @@ button {
   font: inherit;
   color: var(--foreground);
   cursor: pointer;
+}
+
+/* Version (see index.html) — a plain <div>, not a <button>: there's no
+   sub-page to drill into, just the version number itself shown inline
+   via .settings-device-meta instead of a chevron. */
+.settings-nav-row-static {
+  cursor: default;
 }
 
 .settings-nav-row svg:first-child {
@@ -386,25 +393,14 @@ button {
   font-size: var(--text-small);
 }
 
-.settings-changelog .settings-device-row {
-  justify-content: space-between;
-  gap: var(--space-4);
-  color: var(--muted-foreground);
-  font-size: var(--text-small);
-}
-
-.settings-changelog-date {
-  flex-shrink: 0;
-}
-
-/* Devices/Version/Changelog's full inline content (title + boxed
-   list) is desktop-only — on mobile each is instead a one-line entry
-   in .settings-nav-menu that drills into its own pushed sub-page
-   (data-view-panel="settings-devices" etc., see index.html), the same
-   pattern History uses. The content itself is duplicated between the
-   two (impractical to share: one is inline markup inside the Settings
-   panel, the other its own top-level .view-panel) — if you're editing
-   the device list, version string, or changelog, update both copies. */
+/* Devices' full inline content (title + boxed list) is desktop-only —
+   on mobile it's instead a one-line entry in .settings-nav-menu that
+   drills into its own pushed sub-page (data-view-panel="settings-
+   devices", see index.html), the same pattern History uses. Version
+   has no pushed sub-page (see .settings-nav-row-static above) so its
+   desktop section here is just duplicated inline content, same as
+   Devices' — if you're editing the device list or version string,
+   update both copies. */
 @media (max-width: 1023px) {
   .settings-desktop-only {
     display: none;
@@ -481,6 +477,13 @@ button {
     padding-bottom: calc(56px + var(--space-6) + env(safe-area-inset-bottom, 0px));
   }
 
+  /* Push sub-pages (History, Devices — see #app.nav-push-active below)
+     hide the tab bar entirely, per direct request, so there's nothing
+     left to clear here — just the normal edge inset. */
+  .view-panel[data-nav="push"] {
+    padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  }
+
   /* Floating "Liquid Glass"-style tab bar (current iOS convention) — per
      reference screenshots (Notes' Write/Send/Paste + a separate circular
      Search button; Photos' Library/Collections + a separate circular
@@ -489,8 +492,8 @@ button {
      continuous bar with an internal divider. .tabbar itself is just a
      transparent flex row positioning those two pills — the glass
      treatment lives on .tabbar-group and .tabbar-search-btn themselves. */
-  /* Flush with the true bottom edge, per direct request — no bottom
-     offset and no safe-area reservation at all. */
+  /* 4px above the true bottom edge, per direct request — no safe-area
+     reservation. */
   .tabbar {
     display: flex;
     align-items: center;
@@ -498,8 +501,17 @@ button {
     position: fixed;
     left: var(--space-4);
     right: var(--space-4);
-    bottom: 0;
+    bottom: 4px;
     gap: var(--space-3);
+  }
+
+  /* Settings' own drill-down sub-pages (History, Devices — see
+     isPushView/setTabbarVisibility in app.js, which toggles this
+     class) are reached one level deeper than the tab bar's own views,
+     same as real iOS: a pushed detail screen loses the tab bar until
+     you pop back out. */
+  #app.nav-push-active .tabbar {
+    display: none;
   }
 
   .glass-pill {
@@ -652,6 +664,17 @@ button {
   /* Browser default h2 weight is bold (700) — Medium instead, per
      direct request. */
   font-weight: 500;
+}
+
+/* Inventory's first row sits var(--space-5) below its h2 via .page-
+   header's own margin-bottom (h2 itself carries margin: 0 there, see
+   below). Settings' bare h2 kept the browser's default h2 margin-
+   bottom (~0.83em, font-metric-derived and a few px short of
+   var(--space-5)) instead, so its first row landed measurably higher
+   than Inventory's — visible as a layout jump when switching tabs.
+   Matching the same explicit space-5 here removes that mismatch. */
+[data-view-panel="settings"] > h2 {
+  margin-bottom: var(--space-5);
 }
 
 .page-header h2 {
@@ -1256,10 +1279,24 @@ button {
 
   /* Settings' nav menu (see .settings-nav-menu above) is shown here,
      hidden by its own base display: none on desktop, which keeps
-     Devices/Version/Changelog inline and History on its sidebar item
-     there instead. */
+     Devices/Version inline and History on its sidebar item there
+     instead. */
   .settings-nav-menu {
     display: block;
+    /* Bleeds past .view-panel's own space-4 (16px) edge padding, same
+       technique #inv-table-card uses on mobile — so each row's border-
+       bottom divider reaches the true screen edges instead of stopping
+       16px short, per direct request. Row content padding below adds
+       space-4 back so the icon/text still lines up with the page title
+       above it. */
+    margin-left: calc(-1 * var(--space-4));
+    margin-right: calc(-1 * var(--space-4));
+    width: calc(100% + var(--space-4) * 2);
+  }
+
+  .settings-nav-row {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
   }
 }
 
@@ -1363,10 +1400,9 @@ button {
 /* Pushed-page back button (mobile only — desktop reaches every one of
    these screens as a flat sidebar/inline destination instead, no back
    button needed). Shared by History and Settings' own drill-down
-   sub-pages (Devices/Version/Changelog) rather than styled per view —
-   any panel with data-nav="push" and a .page-header containing a
-   .push-back-btn gets the same centered-title/back-button treatment
-   automatically. */
+   sub-page (Devices) rather than styled per view — any panel with
+   data-nav="push" and a .page-header containing a .push-back-btn gets
+   the same centered-title/back-button treatment automatically. */
 .push-back-btn {
   display: none;
 }
@@ -1384,8 +1420,14 @@ button {
     justify-content: center;
   }
 
+  /* Real iOS drilldown nav bars use a small 17pt semibold title, not
+     the page's normal large heading size — the pushed sub-pages
+     (History, Devices) get that same treatment here rather than
+     inheriting .page-header h2's larger size, per direct request. */
   .view-panel[data-nav="push"] .page-header h2 {
     margin: 0;
+    font-size: 17px;
+    font-weight: 600;
   }
 
   .view-panel[data-nav="push"] .push-back-btn {
@@ -1898,6 +1940,21 @@ button {
   .sheet .modal-close {
     display: none;
   }
+
+  /* Tighter side inset than the desktop dialog's var(--space-5) (24px)
+     — per direct request, scoped to the mobile sheet only so desktop
+     modals keep their existing padding. Footer matched too so the
+     Close/Cancel button stays flush with .modal-body's edges instead
+     of sitting narrower than the content above it. */
+  .sheet .modal-body {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  .sheet .modal-footer {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
 }
 
 
@@ -2004,7 +2061,11 @@ button {
   transition: opacity 0.2s ease-out;
 }
 
-.qr-box:hover::after {
+/* .tilt-active (set by applyTilt(), shared.js) covers touch devices,
+   which have no :hover state to key off — the gyroscope-driven tilt
+   still needs the sheen to show. */
+.qr-box:hover::after,
+.qr-box.tilt-active::after {
   opacity: 0.65;
 }
 
@@ -2049,18 +2110,30 @@ button {
 /* Inside a padded card — a sheet's .modal-body or the desktop
    .inventory-detail-panel — dividers should bleed edge-to-edge instead
    of stopping at the card's own inset padding. Bleed the table past it
-   and push the padding back onto the cells instead. The two containers
-   pad by different amounts (--space-5 vs --space-4), so each needs its
-   own bleed matched to its own padding. */
+   and push the padding back onto the cells instead. #item-view-modal
+   is always a .sheet (see .modal-overlay.sheet, mobile-only — desktop
+   shows the same data inline in .inventory-detail-panel instead, never
+   as this modal), so this matches .sheet .modal-body's --space-4
+   (16px) rather than the desktop dialog's --space-5. */
 .modal-body .detail-kv-table {
-  width: calc(100% + var(--space-5) * 2);
-  margin: 0 calc(var(--space-5) * -1);
+  width: calc(100% + var(--space-4) * 2);
+  margin: 0 calc(var(--space-4) * -1);
 }
 
 .modal-body .detail-kv-table th,
 .modal-body .detail-kv-table td {
-  padding-left: var(--space-5);
-  padding-right: var(--space-5);
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+
+/* Value flush to the row's right edge, label flush left — same
+   left/right logic as an Inventory row (icon + name on the left,
+   amount on the right), per direct request, rather than sitting in a
+   fixed-width middle column. Scoped to the sheet only; the desktop
+   .inventory-detail-panel keeps its own left-aligned value column
+   below. */
+.modal-body .detail-kv-table td {
+  text-align: right;
 }
 
 .inventory-detail-panel .detail-kv-table {

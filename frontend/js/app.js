@@ -267,6 +267,14 @@
     });
   }
 
+  // Push sub-pages (History, Devices) sit one level deeper
+  // than the tab bar's own views — real iOS hides the tab bar on a
+  // pushed detail screen, only bringing it back once you pop out to a
+  // tab-level view again (see #app.nav-push-active, app.css).
+  function setTabbarVisibility(view) {
+    appEl.classList.toggle('nav-push-active', isPushView(view));
+  }
+
   function showViewInstant(view) {
     document.querySelectorAll('.view-panel').forEach(function (panel) {
       panel.hidden = panel.dataset.viewPanel !== view;
@@ -277,6 +285,7 @@
     currentView = view;
     showViewInstant(view);
     setActiveNav(view);
+    setTabbarVisibility(view);
   }
 
   function navigateTo(view) {
@@ -293,6 +302,7 @@
     var nextPanel = panelFor(view);
     currentView = view;
     setActiveNav(view);
+    setTabbarVisibility(view);
 
     if (isMobile() && !navAnimating && prevPanel && nextPanel && (isPushView(view) || isPushView(prev))) {
       animateNav(prevPanel, nextPanel, isPushView(view) ? 'forward' : 'back');

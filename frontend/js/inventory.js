@@ -300,12 +300,21 @@
     updateDesktopSelection(filtered);
   }
 
+  // Plain "D/M/YYYY" rendering of the <input type="date"> value
+  // (YYYY-MM-DD), per direct request — shared by the table's Expiry
+  // column below and the Item View/detail-panel kv row. Split-and-
+  // Number() rather than `new Date(string)` (which reads it as UTC
+  // midnight and can display a day early in any timezone behind UTC).
+  function formatExpiryDate(expiryDate) {
+    if (!expiryDate) return '—';
+    var parts = expiryDate.split('-');
+    var y = Number(parts[0]), m = Number(parts[1]), d = Number(parts[2]);
+    return d + '/' + m + '/' + y;
+  }
+
   // Inventory table's Expiry column only (desktop-visible; hidden by CSS
   // on mobile, see buildRow's own comment) — "D/M/YYYY (relative)" per
-  // desktop-iteration.md. expiryDate is the <input type="date"> value
-  // (YYYY-MM-DD); parsed as local midnight, not via `new Date(string)`
-  // (which reads it as UTC midnight and can display a day early in any
-  // timezone behind UTC).
+  // desktop-iteration.md.
   function formatExpiryCell(expiryDate) {
     if (!expiryDate) return '—';
     var parts = expiryDate.split('-');
@@ -314,8 +323,6 @@
     var now = new Date();
     var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    var dateLabel = d + '/' + m + '/' + y;
-
     var diffDays = Math.round((expiry - today) / 86400000);
     var relLabel;
     if (diffDays < 0) relLabel = 'expired';
@@ -323,7 +330,7 @@
     else if (diffDays > 31) relLabel = Math.round(diffDays / 30) + 'm';
     else relLabel = diffDays + 'd';
 
-    return dateLabel + ' (' + relLabel + ')';
+    return formatExpiryDate(expiryDate) + ' (' + relLabel + ')';
   }
 
   // Table row, used on both desktop and mobile. Desktop selects the row
@@ -436,6 +443,13 @@
   var SHEET_TRANSITION_MS = 320;
 
   function openSheet(sheetOverlay) {
+    // Every sheet this app opens carries a tilt-enabled QR box (Item
+    // View, New Item) — re-zero the gyroscope tilt to "however the
+    // phone is held right now" each time one opens, and request motion
+    // permission on iOS the first time this ever runs (both a no-op on
+    // desktop, see shared.js). This click handler is the synchronous
+    // user gesture Safari requires for that permission prompt.
+    storageBase.recalibrateTilt();
     sheetOverlay.classList.remove('is-closing');
     sheetOverlay.hidden = false;
     void sheetOverlay.offsetWidth; // force layout so is-open's transition starts from the closed state, not skips straight to open
@@ -497,7 +511,7 @@
         refs.kv.name.textContent = it.name || '—';
         refs.kv.category.textContent = it.category || '—';
         refs.kv.amount.textContent = it.amount ? it.amount + ' ' + it.unit : '—';
-        refs.kv.expiry.textContent = it.expiryDate || '—';
+        refs.kv.expiry.textContent = formatExpiryDate(it.expiryDate);
         refs.kv.notes.textContent = it.notes || '—';
       } else {
         refs.meta.innerHTML = '';
