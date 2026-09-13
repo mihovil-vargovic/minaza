@@ -497,6 +497,11 @@ button {
     position: absolute;
     inset: 0;
     overflow-y: auto;
+    /* html/body already have this, but they're not what actually
+       scrolls on mobile — .view-panel is (see overflow-y above) — so
+       it needs its own guard against rubber-banding past its edge and
+       exposing whatever's behind/beneath it. */
+    overscroll-behavior: none;
     /* Opaque — during a push/pop transition both panels are visible and
        overlapping at once (see animateNav in app.js); without its own
        background here, whichever panel is behind shows through any gap
@@ -514,6 +519,31 @@ button {
     padding-bottom: calc(56px + var(--space-6) + env(safe-area-inset-bottom, 0px));
   }
 
+  /* Push-nav dimming (see animateNav, app.js) used to animate
+     `filter: brightness()` on the whole outgoing/incoming panel —
+     cheap-looking in principle, but `filter` forces the browser to
+     actually repaint the panel's entire content through the effect
+     every frame rather than letting the compositor handle it, which is
+     what made History (a full data table, the heaviest panel content
+     in the app) visibly lag/stutter while sliding. A flat opacity scrim
+     on top (position: absolute needs the panel's own position:
+     absolute above as its containing block, already present) gets the
+     same "screen dims" look at effectively zero cost — opacity is
+     compositor-only regardless of what's under it. */
+  .view-panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 320ms ease;
+  }
+
+  .view-panel.nav-dimmed::after {
+    opacity: 0.15;
+  }
+
   /* Push sub-pages (History, Devices — see #app.nav-push-active below)
      hide the tab bar entirely, per direct request, so there's nothing
      left to clear here — just the normal edge inset. */
@@ -529,7 +559,7 @@ button {
      continuous bar with an internal divider. .tabbar itself is just a
      transparent flex row positioning those two pills — the glass
      treatment lives on .tabbar-group and .tabbar-search-btn themselves. */
-  /* 4px above the true bottom edge, per direct request — no safe-area
+  /* 8px above the true bottom edge, per direct request — no safe-area
      reservation. */
   .tabbar {
     display: flex;
@@ -538,7 +568,7 @@ button {
     position: fixed;
     left: var(--space-4);
     right: var(--space-4);
-    bottom: 4px;
+    bottom: 8px;
     gap: var(--space-3);
   }
 

@@ -215,26 +215,33 @@
     fromPanel.style.transition = 'none';
     if (direction === 'forward') {
       toPanel.style.transform = 'translateX(100%)';
+      toPanel.classList.remove('nav-dimmed');
       fromPanel.style.transform = 'translateX(0)';
-      fromPanel.style.filter = 'brightness(1)';
+      fromPanel.classList.remove('nav-dimmed');
     } else {
       toPanel.style.transform = 'translateX(-25%)';
-      toPanel.style.filter = 'brightness(0.85)';
+      toPanel.classList.add('nav-dimmed');
       fromPanel.style.transform = 'translateX(0)';
-      fromPanel.style.filter = 'brightness(1)';
+      fromPanel.classList.remove('nav-dimmed');
     }
     void toPanel.offsetWidth; // force layout so the transition below animates from the state just set, not the previous one
-    var transition = 'transform ' + NAV_TRANSITION_MS + 'ms cubic-bezier(0.32, 0.72, 0, 1), filter ' + NAV_TRANSITION_MS + 'ms ease';
+    // Only transform is JS-driven — the dim scrim's opacity transition
+    // lives in CSS (.view-panel::after, app.css) since it's just a
+    // class toggle, not an inline style, so it isn't reset/reapplied
+    // here (see the note there on why it's an opacity scrim rather than
+    // a `filter` on the panel itself: this is the actual perf fix for
+    // History lagging while sliding in).
+    var transition = 'transform ' + NAV_TRANSITION_MS + 'ms cubic-bezier(0.32, 0.72, 0, 1)';
     toPanel.style.transition = transition;
     fromPanel.style.transition = transition;
     requestAnimationFrame(function () {
       if (direction === 'forward') {
         toPanel.style.transform = 'translateX(0)';
         fromPanel.style.transform = 'translateX(-25%)';
-        fromPanel.style.filter = 'brightness(0.85)';
+        fromPanel.classList.add('nav-dimmed');
       } else {
         toPanel.style.transform = 'translateX(0)';
-        toPanel.style.filter = 'brightness(1)';
+        toPanel.classList.remove('nav-dimmed');
         fromPanel.style.transform = 'translateX(100%)';
       }
     });
@@ -243,7 +250,6 @@
       [fromPanel, toPanel].forEach(function (panel) {
         panel.style.transition = '';
         panel.style.transform = '';
-        panel.style.filter = '';
       });
       navAnimating = false;
     }, NAV_TRANSITION_MS + 30);
