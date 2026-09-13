@@ -581,13 +581,20 @@ button {
     display: none;
   }
 
+  /* "Liquid glass" shell — a glossier take on the plain frosted pill:
+     a diagonal gloss gradient instead of a flat tint, plus a bright
+     inset top edge and a soft dark inset bottom edge (a bevel, like
+     light catching a real glass rim) layered under the drop shadow. */
   .glass-pill {
     border-radius: var(--radius-full);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    background: rgba(250, 250, 250, 0.72);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(250, 250, 250, 0.55));
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 0.9),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.03),
+      var(--shadow-md);
   }
 
   /* No flex-grow — sized to its content (3 tab items) rather than
@@ -610,7 +617,91 @@ button {
     gap: 2px;
     border-radius: var(--radius-full);
     padding: var(--space-2) var(--space-4);
+    /* Clips the oversized swirl below to the pill's own rounded shape;
+       isolate keeps it from blending with anything outside this button. */
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
     transition: background var(--motion-default);
+  }
+
+  /* Iridescent "liquid" swirl — a blurred conic rainbow that spins
+     slowly underneath the icon/label (kept above it via z-index: 1
+     below), per direct request for a "colored liquid fluid shifting
+     inside the selected icon container". Always present but invisible
+     (opacity: 0, animation paused) so becoming active is a cross-fade
+     in rather than a pop; paused while invisible so three idle tabs
+     aren't spinning a rotation animation nobody sees. */
+  .tab-item::before,
+  .tabbar-search-btn::before {
+    content: '';
+    position: absolute;
+    inset: -60%;
+    background: conic-gradient(
+      from 0deg,
+      rgba(255, 55, 120, 0.55),
+      rgba(255, 176, 0, 0.5),
+      rgba(80, 220, 140, 0.5),
+      rgba(0, 170, 255, 0.55),
+      rgba(150, 60, 255, 0.5),
+      rgba(255, 55, 120, 0.55)
+    );
+    filter: blur(16px) saturate(160%);
+    opacity: 0;
+    z-index: 0;
+    pointer-events: none;
+    animation: tab-liquid-swirl 10s linear infinite;
+    animation-play-state: paused;
+    transition: opacity 0.35s ease;
+  }
+
+  .tab-item.active::before,
+  .tabbar-search-btn.active::before {
+    opacity: 0.55;
+    animation-play-state: running;
+  }
+
+  .tab-item .nav-icon,
+  .tab-item .tab-label,
+  .tabbar-search-btn .nav-icon {
+    position: relative;
+    z-index: 1;
+  }
+
+  @keyframes tab-liquid-swirl {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Glossy glass base + a slow-breathing iridescent glow (the "dynamic
+     iridescent glowing active state") — the glow's hue drifts between
+     two points via tab-glow-pulse below rather than sitting static.
+     (The swirl's own rotation lives entirely on ::before, above — this
+     element only needs the glow animation.) */
+  .tab-item.active,
+  .tabbar-search-btn.active {
+    background: rgba(255, 255, 255, 0.55);
+    color: var(--foreground);
+    animation: tab-glow-pulse 5s ease-in-out infinite;
+  }
+
+  @keyframes tab-glow-pulse {
+    0%,
+    100% {
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.8),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.04),
+        0 2px 10px -2px rgba(0, 0, 0, 0.18),
+        0 0 16px 1px rgba(130, 120, 255, 0.35);
+    }
+    50% {
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.8),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.04),
+        0 2px 10px -2px rgba(0, 0, 0, 0.18),
+        0 0 20px 3px rgba(0, 200, 255, 0.4);
+    }
   }
 
   .tab-label {
@@ -628,13 +719,11 @@ button {
     height: 56px;
     background: none;
     border: none;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
     color: var(--muted-foreground);
     transition: background var(--motion-default), color var(--motion-default);
-  }
-
-  .tabbar-search-btn.active {
-    background: rgba(9, 9, 11, 0.08);
-    color: var(--foreground);
   }
 
   .modal-overlay {
