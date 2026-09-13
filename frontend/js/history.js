@@ -79,6 +79,58 @@
     });
   }
 
+  // Same reasoning as Inventory's own renderSkeleton (inventory.js): a
+  // blank list while the request is in flight, then the real rows
+  // suddenly popping in all at once, read as a glitch/flash — a
+  // placeholder shaped like the real rows makes that swap read as
+  // "content filling in" instead. Mirrors buildRow's 5 columns; the
+  // shared .hist-row class means the existing mobile column-hiding
+  // rules (Category/Amount/Restore hidden, see the media query below)
+  // apply to these placeholder cells too.
+  function renderSkeleton() {
+    listEl.innerHTML = '';
+    for (var i = 0; i < 4; i++) {
+      var tr = document.createElement('tr');
+      tr.className = 'inv-row hist-row skeleton-row';
+
+      var nameTd = document.createElement('td');
+      nameTd.className = 'skeleton-cell-line';
+      var nameLine = document.createElement('div');
+      nameLine.className = 'skeleton-line skeleton-line-inv-name';
+      nameTd.appendChild(nameLine);
+      tr.appendChild(nameTd);
+
+      var catTd = document.createElement('td');
+      var catPill = document.createElement('div');
+      catPill.className = 'skeleton-line skeleton-pill-inv-category';
+      catTd.appendChild(catPill);
+      tr.appendChild(catTd);
+
+      var amtTd = document.createElement('td');
+      amtTd.className = 'skeleton-cell-line';
+      var amtLine = document.createElement('div');
+      amtLine.className = 'skeleton-line skeleton-line-inv-amount';
+      amtTd.appendChild(amtLine);
+      tr.appendChild(amtTd);
+
+      var removedTd = document.createElement('td');
+      removedTd.className = 'skeleton-cell-line';
+      var removedLine = document.createElement('div');
+      removedLine.className = 'skeleton-line skeleton-line-inv-expiry';
+      removedTd.appendChild(removedLine);
+      tr.appendChild(removedTd);
+
+      var actionTd = document.createElement('td');
+      actionTd.className = 'hist-row-action';
+      var actionPill = document.createElement('div');
+      actionPill.className = 'skeleton-line skeleton-pill-hist-action';
+      actionTd.appendChild(actionPill);
+      tr.appendChild(actionTd);
+
+      listEl.appendChild(tr);
+    }
+  }
+
   function setState(kind) {
     if (!kind) {
       stateEl.hidden = true;
@@ -89,7 +141,7 @@
     if (kind === 'loading') {
       stateEl.hidden = true;
       listEl.hidden = false;
-      listEl.innerHTML = '';
+      renderSkeleton();
       return;
     }
 

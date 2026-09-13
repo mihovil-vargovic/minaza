@@ -913,6 +913,19 @@ button {
   width: 64px;
 }
 
+/* History's own loading skeleton (see renderSkeleton, history.js)
+   reuses the three placeholders above (Name/Category/Removed all being
+   the same shapes as Inventory's Name/Category/Expiry) plus this one
+   for its extra Restore-button column — sized a touch smaller than the
+   real .btn-tertiary it stands in for, matching how the category pill
+   placeholder above also reads a bit smaller than its real chip. */
+.skeleton-pill-hist-action {
+  height: 28px;
+  width: 64px;
+  border-radius: var(--radius);
+  margin-left: auto;
+}
+
 /* Desktop detail-panel loading skeleton — mirrors #inv-detail-content's
    structure 1:1 (header/QR/id/kv-table) so the panel doesn't flash empty
    or jump in size once the first item auto-selects. Only shown during
